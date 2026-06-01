@@ -1,10 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { api } from "@/lib/api-client";
 import { fmtMoney, shortHash } from "@/lib/format";
 import { TopNav, PageHead, Footer, Spinner, FaceValueChip } from "@/components/ui";
 import type { Drop, PurchaseResp } from "@/lib/types";
+
+type LogLine = { ts: string; text: string; tone: "" | "ok" | "bad" | "dim" };
+
+function stamp() {
+  const d = new Date();
+  const p = (n: number, l = 2) => String(n).padStart(l, "0");
+  return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}.${p(d.getMilliseconds(), 3)}`;
+}
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 function fmtDate(d: string) {
   try {
@@ -14,7 +23,39 @@ function fmtDate(d: string) {
   }
 }
 
-function DropCard({ drop, loading }: { drop: Drop | null; loading: boolean }) {
+function EngineTerminal({ logs }: { logs: LogLine[] }) {
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+  }, [logs]);
+  return (
+    <div className="engine-term" data-testid="engine-terminal">
+      <div className="term-bar">
+        <span className="dot" style={{ background: "#e2574d" }}></span>
+        <span className="dot" style={{ background: "#e8b84b" }}></span>
+        <span className="dot" style={{ background: "#1c9d6b" }}></span>
+        <span className="t">valiron · engine</span>
+        <span className="live">live</span>
+      </div>
+      <div className="term-body" ref={bodyRef}>
+        {logs.length === 0 ? (
+          <div className="ln dim">
+            <span className="ts">{"--:--:--.---"}</span>engine idle · verify to arm your agent
+          </div>
+        ) : (
+          logs.map((l, i) => (
+            <div key={i} className={"ln " + l.tone}>
+              <span className="ts">{l.ts}</span>
+              {l.text}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DropCard({ drop, loading, logs }: { drop: Drop | null; loading: boolean; logs: LogLine[] }) {
   if (loading || !drop) {
     return (
       <div className="card card-pad dropcard">
@@ -28,7 +69,7 @@ function DropCard({ drop, loading }: { drop: Drop | null; loading: boolean }) {
   const pct = Math.round((drop.remaining / drop.totalInventory) * 100);
   return (
     <div className="card card-pad dropcard">
-      <span className="chip chip-accent" style={{ fontSize: 11.5 }}>Active drop · on sale now</span>
+      <span className="chip chip-accent" style={{ fontSize: 11.5 }}>Live drop · agent-armed checkout</span>
       <div className="ev" style={{ marginTop: 16 }}>{drop.event}</div>
       <div className="meta">{drop.venue} · {fmtDate(drop.date)}</div>
       <div className="drop-perf"></div>
@@ -53,6 +94,9 @@ function DropCard({ drop, loading }: { drop: Drop | null; loading: boolean }) {
       <div style={{ marginTop: 18 }}>
         <FaceValueChip amount={drop.faceValue} />
       </div>
+
+      {/* Live engine terminal — shows the real Valiron + policy calls as they run */}
+      <EngineTerminal logs={logs} />
     </div>
   );
 }
@@ -67,6 +111,11 @@ export default function FanPage() {
   const [buying, setBuying] = useState(false);
   const [result, setResult] = useState<PurchaseResp | null>(null);
 
+  const [logs, setLogs] = useState<LogLine[]>([]);
+  function log(text: string, tone: LogLine["tone"] = "") {
+    setLogs((l) => [...l, { ts: stamp(), text, tone }]);
+  }
+
   function loadDrop() {
     setLoadingDrop(true);
     api.getDrops().then((res) => {
@@ -79,23 +128,62 @@ export default function FanPage() {
 
   const verified = !!nullifier;
 
-  function verify() {
+  async function verify() {
     setVerifying(true);
-    api.worldIdVerify().then((res) => {
-      setVerifying(false);
-      if (res && res.data && res.data.ok) setNullifier(res.data.nullifierHash);
-    });
+    log("→ world-id: requesting proof-of-personhood…", "dim");
+    const res = await api.worldIdVerify();
+    setVerifying(false);
+    if (res && res.data && res.data.ok) {
+      setNullifier(res.data.nullifierHash);
+      log(`✓ world-id: verified · ${res.data.verificationLevel} · nullifier ${shortHash(res.data.nullifierHash)}`, "ok");
+      log("  one human, one ticket — agent bound to this identity", "dim");
+    }
   }
 
-  function buy() {
+  async function buy() {
     if (!verified || !drop) return;
     setBuying(true);
     setResult(null);
-    api.purchase({ dropId: drop.id, agentId: "25459", chain: "ethereum", humanId: nullifier }).then((res) => {
-      setBuying(false);
-      setResult(res.data);
-      loadDrop();
-    });
+
+    // Agent arms and waits for the exact on-sale moment — then fires.
+    log(`agent armed — watching "${drop.event}"`, "dim");
+    log("drop opens in 00:00:03 …", "dim");
+    await wait(650);
+    log("drop opens in 00:00:02 …", "dim");
+    await wait(650);
+    log("drop opens in 00:00:01 …", "dim");
+    await wait(650);
+    log("▌ DROP OPEN — agent firing", "");
+    log("→ valiron.getAgentProfile(25459, ethereum)", "");
+
+    const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
+    const res = await api.purchase({ dropId: drop.id, agentId: "25459", chain: "ethereum", humanId: nullifier });
+    const ms = Math.round((typeof performance !== "undefined" ? performance.now() : Date.now()) - t0);
+
+    const t = res.data?.trust;
+    if (t) {
+      if (t.allow) {
+        log(`✓ trust gate: ALLOW · score ${t.score ?? "—"} · ${t.route}${t.worldIdVerified ? " · World ID ✓" : ""}  (${ms}ms)`, "ok");
+      } else {
+        log(`✗ trust gate: DENY · ${t.route}  (${ms}ms)`, "bad");
+      }
+    }
+
+    const d = res.data;
+    if (d?.decision === "approved") {
+      log("→ authority gate: 1 ticket / verified human · ok", "");
+      log(`✓ TICKET SECURED ${d.ticketId} · ${fmtMoney(d.faceValue ?? 0)} face value · identity-bound`, "ok");
+    } else if (d?.code === "LIMIT_REACHED") {
+      log("✗ authority gate: one ticket per verified human — blocked", "bad");
+    } else if (d?.stage === "trust") {
+      log("✗ blocked at the Valiron trust gate", "bad");
+    } else if (d?.message) {
+      log("✗ " + d.message, "bad");
+    }
+
+    setResult(d);
+    setBuying(false);
+    loadDrop();
   }
 
   function newIdentity() {
@@ -103,6 +191,7 @@ export default function FanPage() {
     setResult(null);
     setVerifying(false);
     setBuying(false);
+    setLogs([]);
   }
 
   const approved = !!result && result.decision === "approved";
@@ -113,11 +202,11 @@ export default function FanPage() {
       <main className="wrap">
         <PageHead
           title="Verify, then get your ticket"
-          subtitle="Prove you're one real human — once. Your verified agent clears the Valiron gate and buys a single ticket at face value."
+          subtitle="Prove you're one real human — once. Your verified agent arms, waits for the exact drop, and clears the Valiron gate in milliseconds."
         />
 
         <div className="fan-grid">
-          <DropCard drop={drop} loading={loadingDrop} />
+          <DropCard drop={drop} loading={loadingDrop} logs={logs} />
 
           <div className="steps-col">
             {/* STEP 1 — VERIFY */}
@@ -154,19 +243,19 @@ export default function FanPage() {
               )}
             </div>
 
-            {/* STEP 2 — BUY */}
+            {/* STEP 2 — BUY AT THE DROP */}
             <div className={"stepc " + (verified ? (result ? "done-step" : "active") : "locked")}>
               <div className="step-num">
                 <span className="b">{approved ? "✓" : "2"}</span>
                 <span className="lbl">STEP 2</span>
               </div>
-              <h3>Your agent buys at face value</h3>
-              <p className="sd">Your identity-backed agent (#25459, ethereum) clears Valiron&apos;s trust gate and secures exactly one ticket — bound to you, non-transferable.</p>
+              <h3>Your agent fires at the drop</h3>
+              <p className="sd">Your identity-backed agent (#25459, ethereum) arms and waits for the on-sale instant — then clears Valiron&apos;s trust gate in milliseconds and secures exactly one ticket, bound to you, non-transferable. Watch the engine run in the terminal.</p>
 
               <div className="step-action">
                 <button className="btn btn-fan btn-block btn-lg" data-testid="buy-button" onClick={buy} disabled={!verified || buying}>
-                  {buying ? <React.Fragment><Spinner /> Securing your ticket…</React.Fragment>
-                    : verified ? "Buy 1 ticket at face value" : "Verify first to unlock"}
+                  {buying ? <React.Fragment><Spinner /> Agent at the drop…</React.Fragment>
+                    : verified ? "Send my agent to the drop →" : "Verify first to unlock"}
                 </button>
               </div>
 

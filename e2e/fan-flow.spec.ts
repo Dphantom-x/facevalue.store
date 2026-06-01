@@ -28,6 +28,8 @@ test.describe("Phase 3 — fan verify + buy", () => {
       timeout: 90_000,
     });
     await expect(page.getByTestId("purchase-result")).toContainText(/non-transferable/i);
+    // The live engine terminal surfaced the real Valiron trust gate.
+    await expect(page.getByTestId("engine-terminal")).toContainText(/trust gate/i);
 
     // Second purchase, same verified human — blocked.
     await page.getByTestId("buy-button").click();
