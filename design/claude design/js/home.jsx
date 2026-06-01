@@ -1,5 +1,6 @@
-import Link from "next/link";
-import { Brand, ValironMark, FaceValueChip, Footer } from "@/components/ui";
+/* ============================================================
+   FaceValue — Home / landing  (airy editorial)
+   ============================================================ */
 
 function HomeNav() {
   return (
@@ -7,9 +8,9 @@ function HomeNav() {
       <div className="nav-inner">
         <Brand />
         <div className="nav-links">
-          <Link href="/simulation" className="nav-link">Simulation</Link>
-          <Link href="/fan" className="nav-link">Fan</Link>
-          <Link href="/vendor" className="nav-link">Vendor</Link>
+          <a href="simulation.html" className="nav-link">Simulation</a>
+          <a href="fan.html" className="nav-link">Fan</a>
+          <a href="vendor.html" className="nav-link">Vendor</a>
           <ValironMark />
         </div>
       </div>
@@ -25,11 +26,11 @@ function Hero() {
         <h1>Real fans. Real tickets. <span className="fv">Face value.</span></h1>
         <p className="hero-intro">
           Scalpers win by running <b>bot swarms across fake accounts</b>. FaceValue requires
-          proof-of-personhood — one real human, one ticket — and runs every fan&apos;s verified agent
-          through <b>Valiron&apos;s trust gate</b> before any purchase clears.
+          proof-of-personhood — one real human, one ticket — and runs every fan's verified agent
+          through <b>Valiron's trust gate</b> before any purchase clears.
         </p>
         <div className="hero-cta">
-          <Link href="/simulation" className="btn btn-ink btn-lg">▶&nbsp; Watch the live simulation</Link>
+          <a href="simulation.html" className="btn btn-ink btn-lg">▶&nbsp; Watch the live simulation</a>
           <a href="#how" className="btn btn-ghost btn-lg">How it works</a>
         </div>
         <p className="hero-foot">Two gates on every buy — trust (Valiron) + authority (one human, one ticket).</p>
@@ -72,7 +73,7 @@ function Doors() {
   return (
     <section className="wrap">
       <div className="doors">
-        <Link href="/simulation" className="door door-primary">
+        <a href="simulation.html" className="door door-primary">
           <div>
             <div className="door-kicker">The centerpiece</div>
             <div className="door-label">Scalpers vs FaceValue — watch it live</div>
@@ -86,9 +87,9 @@ function Doors() {
             </div>
             <span className="door-arrow">→</span>
           </div>
-        </Link>
+        </a>
 
-        <Link href="/fan" className="door">
+        <a href="fan.html" className="door">
           <div>
             <div className="door-kicker">For fans</div>
             <div className="door-label">Verify &amp; get your ticket</div>
@@ -97,9 +98,9 @@ function Doors() {
             <span className="chip chip-fv" style={{ fontSize: 11.5, padding: "5px 11px" }}>1 human · 1 ticket</span>
             <span className="door-arrow">→</span>
           </div>
-        </Link>
+        </a>
 
-        <Link href="/vendor" className="door">
+        <a href="vendor.html" className="door">
           <div>
             <div className="door-kicker">For vendors</div>
             <div className="door-label">Launch a verified-fan drop</div>
@@ -108,7 +109,7 @@ function Doors() {
             <span className="chip chip-accent" style={{ fontSize: 11.5, padding: "5px 11px" }}>Scalpers excluded</span>
             <span className="door-arrow">→</span>
           </div>
-        </Link>
+        </a>
       </div>
     </section>
   );
@@ -122,8 +123,8 @@ function Problem() {
           <span className="eyebrow">The problem</span>
           <h2 className="sec-title">Tickets vanish in seconds — then reappear at <span className="fv">5–10× face value.</span></h2>
           <p className="sec-lead">
-            Scalpers win because today&apos;s defenses verify <i>accounts</i>, and accounts are trivial to fake.
-            It&apos;s been illegal since the BOTS Act of 2016, and it&apos;s still everywhere.
+            Scalpers win because today's defenses verify <i>accounts</i>, and accounts are trivial to fake.
+            It's been illegal since the BOTS Act of 2016, and it's still everywhere.
           </p>
         </div>
         <div className="stats">
@@ -181,7 +182,7 @@ function Audience() {
     <section className="section">
       <div className="wrap">
         <div className="sec-head" style={{ marginBottom: 40 }}>
-          <span className="eyebrow">Who it&apos;s for</span>
+          <span className="eyebrow">Who it's for</span>
           <h2 className="sec-title">Built for the fans. <span className="fv">Bought by the vendors.</span></h2>
         </div>
         <div className="audience">
@@ -189,12 +190,12 @@ function Audience() {
             <span className="tag">For fans</span>
             <h3>One human, one ticket, face value.</h3>
             <ul>
-              <li><span className="ck">✓</span>Prove you&apos;re one real person — just once.</li>
+              <li><span className="ck">✓</span>Prove you're one real person — just once.</li>
               <li><span className="ck">✓</span>Your verified agent buys the moment the drop opens.</li>
               <li><span className="ck">✓</span>No camping, no swarm, no scalper ahead of you.</li>
               <li><span className="ck">✓</span>The ticket is bound to you — non-transferable.</li>
             </ul>
-            <div className="go"><Link href="/fan" className="btn btn-fan">Verify &amp; get your ticket →</Link></div>
+            <div className="go"><a href="fan.html" className="btn btn-fan">Verify &amp; get your ticket →</a></div>
           </div>
           <div className="aud aud-vendor">
             <span className="tag">For vendors</span>
@@ -205,7 +206,7 @@ function Audience() {
               <li><span className="ck">✓</span>Resale on your product is killed at the source.</li>
               <li><span className="ck">✓</span>You get a clean, real demand signal.</li>
             </ul>
-            <div className="go"><Link href="/vendor" className="btn btn-accent">Launch a verified-fan drop →</Link></div>
+            <div className="go"><a href="vendor.html" className="btn btn-accent">Launch a verified-fan drop →</a></div>
           </div>
         </div>
       </div>
@@ -213,9 +214,9 @@ function Audience() {
   );
 }
 
-export default function Home() {
+function Home() {
   return (
-    <>
+    <React.Fragment>
       <HomeNav />
       <Hero />
       <Doors />
@@ -223,6 +224,8 @@ export default function Home() {
       <How />
       <Audience />
       <Footer />
-    </>
+    </React.Fragment>
   );
 }
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Home />);

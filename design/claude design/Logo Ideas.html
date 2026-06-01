@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FaceValue — Logo Ideas</title>
+<link rel="stylesheet" href="styles/globals.css" />
+<style>
+  body { background: var(--bg); color: var(--ink-2); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: clamp(40px,7vh,80px) clamp(20px,5vw,56px) 120px; }
+
+  /* header */
+  .head { text-align: center; max-width: 60ch; margin: 0 auto clamp(40px,6vh,68px); }
+  .head .eyebrow { display: inline-block; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-ink); background: var(--accent-wash); border: 1px solid var(--accent-line); padding: 6px 13px; border-radius: var(--r-pill); }
+  .head h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(34px,5.4vw,58px); letter-spacing: -0.022em; line-height: 1.04; margin: 22px 0 0; color: var(--ink); }
+  .head h1 em { font-style: italic; color: var(--accent); }
+  .head p { margin: 18px auto 0; font-size: clamp(15px,1.6vw,18px); line-height: 1.55; color: var(--muted); max-width: 52ch; }
+
+  /* grid */
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--sh-sm); padding: 28px 28px 24px; transition: transform .2s var(--ease), box-shadow .22s; }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--sh); }
+
+  .card-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .num { font-family: var(--mono); font-size: 12px; color: var(--faint); }
+  .nm { font-family: var(--font-display); font-size: 21px; font-weight: 400; letter-spacing: -0.01em; color: var(--ink); }
+  .desc { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin: 4px 0 0; max-width: 40ch; }
+
+  /* specimen row: pfp · favicon · dark pfp · wordmark */
+  .specimens { display: flex; align-items: center; gap: 22px; margin: 26px 0 18px; flex-wrap: wrap; }
+  .pfp { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+  .pfp.light { background: var(--surface-2); border: 1px solid var(--line); }
+  .pfp.dark  { background: var(--stage); }
+  .fav { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line); flex: none; }
+  .specimens svg { display: block; }
+
+  .lockup { display: flex; align-items: center; gap: 11px; margin-left: auto; }
+  .lockup .lk-mark { width: 30px; height: 30px; display: grid; place-items: center; flex: none; }
+  .lockup .lk-word { font-family: var(--font-display); font-size: 22px; font-weight: 400; letter-spacing: -0.018em; color: var(--ink); white-space: nowrap; }
+  .lockup .lk-word b { font-weight: 500; }
+  @media (max-width: 520px) { .lockup { margin-left: 0; } }
+
+  .tags { display: flex; gap: 7px; flex-wrap: wrap; border-top: 1px solid var(--line-soft); padding-top: 16px; }
+  .tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .03em; color: var(--muted); background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 4px 9px; }
+  .tag.blue { color: var(--accent-ink); background: var(--accent-wash); border-color: var(--accent-line); }
+  .tag.green { color: var(--fan-ink); background: var(--fan-wash); border-color: var(--fan-line); }
+
+  .footnote { text-align: center; margin-top: 48px; font-size: 13.5px; color: var(--muted); }
+  .footnote b { color: var(--ink-2); font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="head">
+      <span class="eyebrow">Logo exploration</span>
+      <h1>Ten marks for <em>FaceValue</em></h1>
+      <p>Each concept shown as a profile avatar, a 34px favicon, a dark-mode avatar, and a wordmark lockup — so you can judge how it reads in a corner and as a PFP. Built from the brand palette: royal blue, verified emerald, slate ink.</p>
+    </header>
+
+    <div class="grid" id="grid"></div>
+
+    <p class="footnote">All vector — they stay crisp at any size. Tell me which <b>one or two</b> you like and I'll refine, add a full lockup, and export favicon + PFP files.</p>
+  </div>
+
+<script>
+/* ---- shared palette ---- */
+const C = {
+  blue:'#3257e8', blueDeep:'#2742b8', green:'#1c9d6b', greenDeep:'#157a53',
+  ink:'#1b1e26', white:'#ffffff', faint:'#a2a8b4'
+};
+
+/* Each mark is a function(size, fg) -> innerSVG markup for a 0 0 64 64 viewBox.
+   fg lets us recolor for dark backgrounds. */
+const MARKS = [
+  {
+    name:'Check-V', kicker:'01',
+    desc:'The V of Value doubled as a verification check. One stroke says “verified” and “face value”.',
+    tags:[['Monogram','blue'],['Verified',''],['Single stroke','']],
+    draw:(fg)=>`<path d="M14 22 L30 46 L52 14" fill="none" stroke="${fg}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>`
+  },
+  {
+    name:'Equal Stub', kicker:'02',
+    desc:'An equals sign — fair = face value — with the lower bar torn like a ticket perforation.',
+    tags:[['Concept','blue'],['Ticket','']],
+    draw:(fg)=>`<rect x="14" y="22" width="36" height="7" rx="3.5" fill="${fg}"/><g fill="${fg}"><rect x="14" y="37" width="7" height="7" rx="2"/><rect x="24" y="37" width="7" height="7" rx="2"/><rect x="34" y="37" width="7" height="7" rx="2"/><rect x="44" y="37" width="6" height="7" rx="2"/></g>`
+  },
+  {
+    name:'Perf Ring', kicker:'03',
+    desc:'A ring of ticket-perforation dots — a quiet, abstract badge that sits beautifully inside a circle.',
+    tags:[['Abstract','blue'],['PFP-first','']],
+    draw:(fg)=>{let d='';for(let i=0;i<12;i++){const a=(i/12)*Math.PI*2-Math.PI/2;const x=32+19*Math.cos(a);const y=32+19*Math.sin(a);d+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.1" fill="${fg}"/>`;}return d+`<path d="M25 32 L30 37 L40 26" fill="none" stroke="${fg}" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>`;}
+  },
+  {
+    name:'FV Ligature', kicker:'04',
+    desc:'F and V sharing a stem — a tight geometric monogram that scales down to a favicon cleanly.',
+    tags:[['Monogram','blue'],['Favicon','']],
+    draw:(fg)=>`<g fill="none" stroke="${fg}" stroke-width="6.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 14 L18 50"/><path d="M18 15 L40 15"/><path d="M18 31 L34 31"/><path d="M34 14 L46 50 L46 50"/></g>`
+  },
+  {
+    name:'Fair Seat', kicker:'05',
+    desc:'A single stadium seat seen head-on, the backrest notched into a check. Literal but warm.',
+    tags:[['Pictorial',''],['Verified','green']],
+    draw:(fg)=>`<path d="M20 16 q-3 0 -3 4 l0 18 q0 3 3 3 l24 0 q3 0 3 -3 l0 -18 q0 -4 -3 -4 z" fill="none" stroke="${fg}" stroke-width="5.2" stroke-linejoin="round"/><rect x="18" y="44" width="6" height="8" rx="2" fill="${fg}"/><rect x="40" y="44" width="6" height="8" rx="2" fill="${fg}"/>`
+  },
+  {
+    name:'Torn Ticket', kicker:'06',
+    desc:'A ticket mid-tear — the diagonal split reads as motion and as the slash in “face/value”.',
+    tags:[['Pictorial','blue'],['Ticket','']],
+    draw:(fg)=>`<path d="M14 24 L34 20 L30 44 L14 47 Z" fill="${fg}"/><path d="M50 40 L30 44 L34 20 L50 17 Z" fill="none" stroke="${fg}" stroke-width="4.4" stroke-linejoin="round"/>`
+  },
+  {
+    name:'Value Coin', kicker:'07',
+    desc:'A coin-like disc with the FV set in the brand serif — feels like a seal of authenticity.',
+    tags:[['Badge',''],['Serif','blue']],
+    draw:(fg)=>`<circle cx="32" cy="32" r="20" fill="none" stroke="${fg}" stroke-width="3.4"/><text x="32" y="40.5" text-anchor="middle" font-family="Newsreader, Georgia, serif" font-style="italic" font-weight="500" font-size="22" fill="${fg}">FV</text>`
+  },
+  {
+    name:'Open Gate', kicker:'08',
+    desc:'An arched doorway — the gate that only real fans pass through — capped with a check keystone.',
+    tags:[['Pictorial',''],['Verified','green']],
+    draw:(fg)=>`<path d="M16 50 L16 30 a16 16 0 0 1 32 0 L48 50" fill="none" stroke="${fg}" stroke-width="5.4" stroke-linecap="round"/><path d="M26 30 L31 35 L40 24" fill="none" stroke="${fg}" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>`
+  },
+  {
+    name:'Barcode F', kicker:'09',
+    desc:'The F built from scannable barcode bars — instantly “ticket” with zero literal illustration.',
+    tags:[['Monogram','blue'],['Ticket','']],
+    draw:(fg)=>`<g fill="${fg}"><rect x="16" y="14" width="5" height="36" rx="1.5"/><rect x="24" y="14" width="3" height="36" rx="1.5"/><rect x="24" y="14" width="22" height="5.5" rx="2"/><rect x="24" y="29" width="15" height="5.5" rx="2"/></g>`
+  },
+  {
+    name:'Two-Up Check', kicker:'10',
+    desc:'Two upward chevrons — fan and artist, meeting at fair price. Dynamic, optimistic, mark-only.',
+    tags:[['Abstract','blue'],['Dynamic','']],
+    draw:(fg)=>`<g fill="none" stroke="${fg}" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 38 L24 26 L34 38"/><path d="M30 38 L40 26 L50 38"/></g>`
+  },
+];
+
+const wordmark = (fg)=>`<span class="lk-word" style="color:${fg}">Face<b>Value</b></span>`;
+
+function svg(markFn, fg, px){
+  return `<svg width="${px}" height="${px}" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">${markFn(fg)}</svg>`;
+}
+
+const grid = document.getElementById('grid');
+MARKS.forEach(m=>{
+  const card = document.createElement('div');
+  card.className = 'card';
+  const tagsHtml = m.tags.map(t=>`<span class="tag ${t[1]}">${t[0]}</span>`).join('');
+  card.innerHTML = `
+    <div class="card-top">
+      <div>
+        <div class="num">${m.kicker} / 10</div>
+        <div class="nm">${m.name}</div>
+      </div>
+    </div>
+    <p class="desc">${m.desc}</p>
+    <div class="specimens">
+      <div class="pfp light" title="Avatar on light">${svg(m.draw, C.blue, 44)}</div>
+      <div class="fav" title="34px favicon">${svg(m.draw, C.ink, 22)}</div>
+      <div class="pfp dark" title="Avatar on dark">${svg(m.draw, '#ffffff', 44)}</div>
+      <div class="lockup">
+        <span class="lk-mark">${svg(m.draw, C.blue, 26)}</span>
+        ${wordmark(C.ink)}
+      </div>
+    </div>
+    <div class="tags">${tagsHtml}</div>
+  `;
+  grid.appendChild(card);
+});
+</script>
+</body>
+</html>

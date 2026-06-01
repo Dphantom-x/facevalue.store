@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# claude code local config
+.claude/
+
+# unrelated local tooling (not part of FaceValue — kept on disk, excluded from repo)
+/instagram_handles.md
+/scripts/find_ig.mjs
+/scripts/playwright_ig.js

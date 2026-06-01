@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FaceValue — Verify & get your ticket</title>
+<link rel="stylesheet" href="styles/globals.css" />
+<style>
+  .fan-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 26px; align-items: start; margin-top: 36px; }
+  @media (max-width: 900px) { .fan-grid { grid-template-columns: 1fr; } }
+
+  /* drop card (left, sticky) */
+  .dropcard { position: sticky; top: 90px; }
+  .dropcard .ev { font-family: var(--font-display); font-size: 27px; font-weight: 400; letter-spacing: -0.014em; color: var(--ink); line-height: 1.1; }
+  .dropcard .meta { margin-top: 10px; font-size: 14.5px; color: var(--muted); }
+  .drop-perf { position: relative; height: 0; border-top: 2px dashed var(--line-strong); margin: 24px -28px; }
+  .drop-perf::before, .drop-perf::after { content: ""; position: absolute; top: -13px; width: 26px; height: 26px; border-radius: 50%; background: var(--bg); border: 1px solid var(--line); }
+  .drop-perf::before { left: -13px; } .drop-perf::after { right: -13px; }
+  .drop-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+  .drop-stat .k { font-size: 12px; color: var(--muted); }
+  .drop-stat .v { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--ink); margin-top: 3px; }
+  .remaining-bar { height: 7px; border-radius: 99px; background: var(--surface-3); overflow: hidden; margin-top: 18px; }
+  .remaining-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--fan), #3cc492); border-radius: 99px; transition: width .5s var(--ease); }
+
+  /* steps (right) */
+  .steps-col { display: flex; flex-direction: column; gap: 18px; }
+  .stepc { position: relative; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--sh-sm); padding: 26px; transition: border-color .2s, box-shadow .2s, opacity .2s; }
+  .stepc.locked { opacity: .55; }
+  .stepc.active { border-color: var(--accent-line); box-shadow: 0 0 0 4px var(--accent-wash), var(--sh-sm); }
+  .stepc.done-step { border-color: var(--fan-line); }
+  .step-num { display: inline-flex; align-items: center; gap: 10px; }
+  .step-num .b { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-family: var(--mono); font-size: 13px; font-weight: 600; flex: none; background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-2); }
+  .stepc.active .step-num .b { background: var(--accent); border-color: transparent; color: #fff; }
+  .stepc.done-step .step-num .b { background: var(--fan); border-color: transparent; color: #fff; }
+  .step-num .lbl { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+  .stepc h3 { font-family: var(--font-display); font-size: 22px; font-weight: 400; letter-spacing: -0.012em; margin-top: 14px; }
+  .stepc p.sd { margin-top: 8px; font-size: 14.5px; color: var(--muted); line-height: 1.5; }
+  .step-action { margin-top: 22px; }
+
+  /* world id motif */
+  .worldid { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: var(--r); background: var(--surface-2); border: 1px solid var(--line); margin-top: 18px; }
+  .worldid .orb { width: 44px; height: 44px; border-radius: 50%; flex: none; background: radial-gradient(circle at 35% 30%, #fff, #cfd6e6 40%, #1b1e26 100%); box-shadow: 0 4px 14px -4px rgba(0,0,0,.3); position: relative; }
+  .worldid .orb::after { content: ""; position: absolute; inset: 7px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.5); }
+  .worldid .wt { font-size: 13px; line-height: 1.4; }
+  .worldid .wt b { display: block; color: var(--ink); font-weight: 600; }
+  .worldid .wt span { color: var(--muted); }
+
+  .id-readout { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; padding: 12px 14px; border-radius: var(--r-sm); background: var(--fan-wash); border: 1px solid var(--fan-line); }
+  .id-readout .k { font-size: 12px; color: var(--fan-ink); font-weight: 600; white-space: nowrap; }
+  .id-readout .h { font-family: var(--mono); font-size: 12.5px; color: var(--fan-ink); }
+
+  /* purchase result */
+  .result { margin-top: 22px; border-radius: var(--r-lg); padding: 24px; border: 1px solid; animation: popIn .5s var(--ease-out) both; }
+  .result.approved { background: linear-gradient(160deg, #EAF7F0, #F5FBF8); border-color: var(--fan-line); }
+  .result.denied { background: var(--red-wash); border-color: var(--red-line); }
+  .result-head { display: flex; align-items: center; gap: 12px; }
+  .result-head .mk { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 18px; font-weight: 800; flex: none; }
+  .result.approved .mk { background: var(--fan); box-shadow: 0 0 0 5px rgba(28,157,107,.14); }
+  .result.denied .mk { background: var(--red); box-shadow: 0 0 0 5px rgba(226,87,77,.14); }
+  .result-head .rt { font-family: var(--font-display); font-size: 22px; font-weight: 400; color: var(--ink); }
+  .result-msg { margin-top: 14px; font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+  .result-ticket { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(28,157,107,.2); }
+  .result-ticket .tid { font-family: var(--mono); font-size: 12.5px; color: var(--fan-ink); }
+
+  .reset-row { margin-top: 24px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding-top: 22px; border-top: 1px solid var(--line-soft); }
+  .reset-row .note { font-size: 13px; color: var(--muted); max-width: 38ch; line-height: 1.4; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="js/store.js"></script>
+<script type="text/babel" src="js/ui.jsx"></script>
+<script type="text/babel" src="js/fan.jsx"></script>
+</body>
+</html>
