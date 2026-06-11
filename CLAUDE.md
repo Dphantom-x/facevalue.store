@@ -13,11 +13,20 @@ face-value sales, never resale.
 **Language discipline:** never call it a "bot." Scalpers have bots; fans have a *verified agent* in a
 sanctioned, vendor-enabled pipeline. We *enforce* purchase limits (BOTS Act of 2016), we don't circumvent them.
 
-## Current status (2026-06-01)
-Phases 0–4 + x402 stretch complete, **Claude Design UI integrated**, **9 Playwright tests green**,
-production build clean (15 routes). Live at `/`, `/simulation`, `/fan`, `/vendor` with the real design.
-Next: deploy to Vercel + record the demo video (`docs/DEMO.md`). Optional/later: a World ID **Staging**
-app to make the fan-side widget live (the World ID trust signal is already real via Valiron).
+## Current status (2026-06-11)
+**Two tracks.** Track A — hackathon/demo (DONE): Phases 0–4 + x402 stretch, Claude Design UI integrated,
+fan engine terminal, **9 Playwright tests green**, prod build clean, repo pushed; remaining: record the
+120s video (`docs/VIDEO_SCRIPT.md`), optional Vercel deploy. Track B — **market validation (NOW)**:
+post-hackathon MVP per `docs/BUSINESS.md` — discovery → unpaid pilot → 1-page World ID→Stripe funnel
+(no x402/Valiron in the funnel test). Read `docs/BUSINESS.md` before any business/strategy work.
+
+## Documentation system (maintain every session)
+- `docs/journal/YYYY-MM-DD-slug.md` — one entry per working session: work done, `**Decision:**` lines
+  (with why), `**Bug:**`/`**Fix:**` pairs. Add an index row in `docs/JOURNAL.md` (template + conventions live there).
+- `docs/BUSINESS.md` — living business truth (idea, model, risks, gates, funding stance) + changelog.
+- `CLAUDE.md` (this file) — living technical truth.
+- Rule: journal = what happened and why; living docs = what's true now. When current truth changes,
+  update the living doc AND journal it.
 
 ## Stack
 Next.js 15 (App Router, `src/`) · React 19 · TypeScript · Tailwind v4 (`@theme inline` HSL tokens) ·

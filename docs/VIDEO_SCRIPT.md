@@ -1,47 +1,58 @@
-# FaceValue — 120s Demo Video Script (shot-by-shot)
+# FaceValue — Demo Video Script (~120s, conversational cut)
 
-**Target: ~117 seconds.** Slides = the `FaceValue_Deck.pptx`. App = the live site (`/simulation`, `/fan`).
-The two app beats (Sim live cards + Fan terminal) each show a **real Valiron call** — that's the shot a
-sponsor judge is watching for, so the captions must say "Valiron" on screen.
+Read the VO in a natural, confident pace. Slides = `submission/FaceValue_Deck.pptx`. App = the live site.
+Two app moments show a **real Valiron call** — keep a "LIVE — Valiron" caption on both.
 
 ## Pre-record checklist
 1. `npm run warm` — wakes Valiron so the live calls are instant on camera.
-2. Record the app from a **production build** (no dev overlay): `npm run build` then `npm run start` →
-   http://localhost:3000. (Re-run `npm run warm` after.)
-3. Fresh state: after `npm start` the drop is "Midnight Echo · 5 of 5 tickets." (To reset mid-session:
-   `POST http://localhost:3000/api/dev/reset`.)
-4. Record desktop width (~1440px) so the simulation panels sit **side-by-side**.
-5. Dry-run the two app clips once so the clicks are smooth.
-6. Capture slides (fullscreen deck) and the two browser clips separately, then stitch + add VO + captions.
-
-## The single most important shot
-**1:05–1:19 — the live Valiron ALLOW vs DENY** (and again in the fan terminal at 1:19–1:35). Put a bold
-caption on it: "LIVE — Valiron trust gate." That five seconds *is* the pitch.
+2. Record the app from a **production build** (no dev overlay): `npm run build` then `npm run start` → localhost:3000. Re-run `npm run warm`.
+3. Fresh state = "Midnight Echo · 5 of 5 tickets." (To reset mid-session: `POST /api/dev/reset`.)
+4. Record ~1440px wide so the simulation panels sit side-by-side. Capture slides + the two browser clips separately, then stitch with VO + captions.
 
 ---
 
-## Shot list
+## The script (VO + what to show)
 
-| # | Time | On screen | Action | Say (voiceover) | Caption overlay |
-|---|------|-----------|--------|-----------------|-----------------|
-| 1 | 0:00–0:03 | **Slide 1** (Title) | hold | "You waited months for these tickets." | REAL FANS. REAL TICKETS. FACE VALUE. |
-| 2 | 0:03–0:13 | **Slide 2** (Problem $60→$1,200) | hold | "Gone in thirty seconds — then resold to real fans for twenty times face value. A sixty-dollar ticket, twelve hundred on resale. You got scalped. Again." | $60 → $1,200 |
-| 3 | 0:13–0:25 | **Slide 3** (Why it happens) | hold | "It's a ten-billion-dollar problem. It's illegal under federal law. And it still happens at every hot drop — because every defense checks accounts, not people. And accounts are free to fake." | $10B+ · 7,000% · 5B bot attempts/mo |
-| 4 | 0:25–0:34 | **Slide 4** (The Fix) | hold | "FaceValue ends it. We don't fight the bots — we make every buyer prove they're one real person. Fake accounts become useless." | One real human = one ticket |
-| 5 | 0:34–0:40 | **Slide 5** (How it works) | hold | "Two checks before any ticket clears: Valiron verifies a real human; FaceValue gives them one, at face value." | Agent → Valiron → FaceValue → Ticket |
-| 6 | 0:40–0:53 | **App `/simulation`** | Click **"Run the drop."** Pan the LEFT panel as it fills red. | "Here's a live drop. Watch it today — bots grab every ticket across dozens of fake accounts in seconds. Real fans? Shut out." | Today — no verification |
-| 7 | 0:53–1:05 | **App `/simulation`** | Pan to the RIGHT panel (all green) + Mode-B summary. | "Now switch on FaceValue. Every buyer has to be one verified human — so the scalper swarm bounces off the gate, and all five tickets land with real fans." | With FaceValue — verified humans |
-| 8 | 1:05–1:19 | **App `/simulation`** | Scroll to the **Live Valiron trust check** cards. | "And this is not scripted — that's a live call to Valiron, right now. The verified fan's agent: allowed. The scalper's twenty fake identities: denied. Instantly." | **LIVE — Valiron** · fan ✓ ALLOW (92) · scalper ✗ DENY |
-| 9 | 1:19–1:35 | **App `/fan`** | Click **Verify** → **Send my agent to the drop** → let the **terminal** run to "Ticket secured." | "Here's a real fan. One World ID check. Her agent waits for the drop — and the instant it opens, clears Valiron in milliseconds and locks one ticket at face value, bound to her identity. It can never be resold." | trust gate: ALLOW · World ID ✓ · bound to identity |
-| 10 | 1:35–1:41 | **Slide 6** (Result) | hold | "Five tickets. Five real fans. Zero scalpers." | 0 scalpers |
-| 11 | 1:41–1:51 | **Slide 7 → Slide 8** | hold (cut between the two) | "Everyone gets one verified agent — no one can fake fifty. Venues opt in to kill scalping and see real demand — all on Valiron's agent-identity infrastructure." | Venues opt in. Scalpers opt out. |
-| 12 | 1:51–1:57 | **Slide 9** (Close) | hold | "FaceValue. Real fans. Real tickets. Face value." | facevalue.store |
+**[0:00–0:03 · Slide 1 — title]**
+> "You waited months for these tickets."
 
-**Total VO ≈ 275 words ≈ 110s + visual holds ≈ 117s.** If you need to trim under 120 with buffer, cut Slide 5
-(beat 5) and fold its line into beat 4 — that buys ~6s.
+**[0:03–0:13 · Slide 2 — $60 → $1,200]**
+> "Gone in thirty seconds — then resold to real fans for twenty times face value. A sixty-dollar ticket, twelve hundred on resale. You got scalped. Again."
+
+**[0:13–0:23 · Slide 3 — why it happens]**
+> "It's a ten-billion-dollar problem, it's illegal — and it still happens at every drop, because every defense out there checks accounts, not people. And accounts are free to fake."
+
+**[0:23–0:32 · Slide 4 — the fix]**
+> "FaceValue ends it. We don't fight the bots — we make every buyer prove they're one real person. And you can't fake being a person."
+
+**[0:32–0:40 · Slide 5 — how it works]**
+> "So two checks run before any ticket clears: Valiron confirms one real human — then FaceValue issues a single ticket, at face value, bound to that person."
+
+**[0:40–0:54 · App `/simulation` — click "Run the drop," both panels fill]**
+> "Here's a recreation of a real drop. With no verification, a scalper runs a swarm of fake accounts and sweeps the seats right out from under real fans — then relists them at a markup."
+
+**[0:54–1:11 · App `/simulation` — the FaceValue side fills green]**  ← *the Valiron line lands here*
+> "Run that same drop through FaceValue, and every buyer has to be one verified human — so the swarm has nothing to hide behind, and the seats go to real people. And Valiron isn't bolted on for show here — proving that each agent is one real human is the piece that makes all of this work."
+
+**[1:11–1:22 · App `/simulation` — scroll to the Live Valiron cards]**  *(MAGIC MOMENT — caption: "LIVE — Valiron")*
+> "And that check runs live — a real call to Valiron. The real fan's agent: cleared. The scalper's twenty fake identities: denied, on the spot."
+
+**[1:22–1:40 · App `/fan` — verify → send agent to the drop → terminal streams → "Ticket secured"]**
+> "Here's what that feels like as a fan. You head to checkout like normal — but before a ticket is ever yours, two things happen: World ID proves you're one real human, and the instant Valiron clears you, FaceValue locks one ticket to your identity. So it can never be resold."
+
+**[1:40–1:46 · Slide 6 — result]**
+> "Five tickets. Five real fans. Zero scalpers."
+
+**[1:46–1:56 · Slide 7 → Slide 8 — why an agent + the business]**
+> "Everyone gets one verified agent — no one can fake fifty. Venues opt in to kill scalping and see real demand, all on Valiron's agent-identity infrastructure."
+
+**[1:56–2:02 · Slide 9 — close]**
+> "FaceValue. Real fans. Real tickets. Face value."
+
+---
 
 ## Notes
-- Beats 6–8 are **one continuous `/simulation` screen-recording** (run → watch both panels → scroll to the
-  live cards). Beat 9 is **one `/fan` recording** (verify → send agent → terminal → ticket secured).
-- The fan terminal's `(…ms)` timing is the **real** Valiron round-trip — don't fake it; just record the real run.
-- Keep the "LIVE — Valiron" caption on beats 8 and 9. That's the sponsor proof.
+- **Total ≈ 290 words ≈ ~120s** with the visual holds. If you want more buffer, trim Slide 5 (its line is implied by the demo) to save ~6s.
+- **Simulation wording is side-agnostic on purpose** — it never says "left/right," so it works no matter how the panels land on your recording. (For reference, the app shows the *un-verified* drop on the **left** and *FaceValue* on the **right**; tell me if you'd rather I swap that order.)
+- **The two shots that win it:** 1:11–1:22 (live Valiron ALLOW vs DENY) and the `/fan` terminal at 1:22–1:40 (`valiron.getAgentProfile → ALLOW · World ID ✓ · …ms`). Caption both "LIVE — Valiron."
+- The fan terminal's `(…ms)` is the **real** round-trip — record the real run, don't fake it.
