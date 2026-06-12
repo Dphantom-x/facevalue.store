@@ -13,12 +13,34 @@ face-value sales, never resale.
 **Language discipline:** never call it a "bot." Scalpers have bots; fans have a *verified agent* in a
 sanctioned, vendor-enabled pipeline. We *enforce* purchase limits (BOTS Act of 2016), we don't circumvent them.
 
-## Current status (2026-06-11)
+## Current status (2026-06-12)
 **Two tracks.** Track A — hackathon/demo (DONE): Phases 0–4 + x402 stretch, Claude Design UI integrated,
-fan engine terminal, **9 Playwright tests green**, prod build clean, repo pushed; remaining: record the
-120s video (`docs/VIDEO_SCRIPT.md`), optional Vercel deploy. Track B — **market validation (NOW)**:
-post-hackathon MVP per `docs/BUSINESS.md` — discovery → unpaid pilot → 1-page World ID→Stripe funnel
-(no x402/Valiron in the funnel test). Read `docs/BUSINESS.md` before any business/strategy work.
+fan engine terminal; remaining: record the 120s video (`docs/VIDEO_SCRIPT.md`), optional Vercel deploy.
+Track B — **PILOT SYSTEM BUILT (2026-06-12)**: full production-shaped app on SQLite — accounts/sessions,
+locked onboarding wizard, hold→capture payments (mock+Stripe manual-capture), claim/QR tickets,
+returns→waitlist reservations, door check-in, vendor Studio. **18 Playwright specs green + a
+screenshot walkthrough** (`walkthrough/*.png`). Read `docs/BUSINESS.md` before business/strategy work.
+
+## Pilot system architecture (Track B — built 2026-06-12)
+- **DB:** better-sqlite3 at `data/facevalue.db` (gitignored; WAL; auto-schema+seed on first open).
+  `next.config.ts` has `serverExternalPackages: ["better-sqlite3"]` — REQUIRED (config changes need a
+  dev-server restart or every DB route 500s). Reset/reseed: `POST /api/dev/reset` (also wipes users).
+  Legacy `lib/store.ts` keeps its old API but is DB-backed — old demo routes/tests share the same drops table.
+- **Auth:** email+password (bcryptjs) + DB session cookie `fv_session` (30d). Roles fan/vendor/admin.
+  Seeded: `vendor@facevalue.store` / `pilot-vendor-2026`, `admin@facevalue.store` / `pilot-admin-2026`.
+  Vendor signup code env `FV_VENDOR_CODE` (default `PILOT-VENDOR`).
+- **Identity:** `/api/world-id/verify` — logged-in ⇒ deterministic per-user nullifier, BOUND to the
+  account (unique across users = one human, one account); logged-out ⇒ legacy random (demo pages).
+- **Payments (`lib/payments.ts`):** authorize (HOLD) → capture | cancel(free) → refund(fees lost).
+  `PAYMENTS_MODE=mock` (default, fully testable; `simulate:"declined"` card available) or `stripe`
+  (PaymentIntent `capture_method:'manual'`, off_session saved card; SetupIntent client flow = TODO).
+  Claim order: hold → atomic allocate (SQLite tx) → capture; any failure cancels the hold ($0 cost).
+- **Domain (`lib/tickets.ts`):** claim, HMAC-signed QR tokens (`QR_SECRET`), returns→refund→waitlist
+  offer, **returned inventory is RESERVED for offers** (`available = remaining − offered`), door
+  check-in single-use, per-drop stats, audit log.
+- **Pages:** `/drops`, `/drop/[id]` (pre-drop countdown · live · sold-out+waitlist · owned QR · locked
+  onboarding wizard overlay), `/tickets`, `/door` (staff), `/studio` (vendor portal). Legacy `/fan`,
+  `/vendor`, `/simulation` untouched.
 
 ## Documentation system (maintain every session)
 - `docs/journal/YYYY-MM-DD-slug.md` — one entry per working session: work done, `**Decision:**` lines
@@ -81,3 +103,7 @@ Next.js 15 (App Router, `src/`) · React 19 · TypeScript · Tailwind v4 (`@them
 ## Commands
 - `npm run prove:valiron` — Phase 0 trust-call probe (expect ALLOW on 25459, DENY on 1226/1).
 - `npm run dev` — Next dev server.
+- `npm test` — full Playwright suite (18 specs; walkthrough skipped unless WALKTHROUGH=1).
+- `$env:WALKTHROUGH="1"; npx playwright test walkthrough` — full browser click-through, saves
+  screenshots to `walkthrough/` (needs a dev server running or lets Playwright start one).
+- `npm run warm` — wake Valiron before demos.

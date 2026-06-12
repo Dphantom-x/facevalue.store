@@ -24,6 +24,10 @@ export function ValironMark() {
 
 export function TopNav({ here }: { here?: string }) {
   const links = [
+    { href: "/drops", label: "Drops", key: "drops" },
+    { href: "/tickets", label: "My tickets", key: "tickets" },
+    { href: "/studio", label: "Studio", key: "studio" },
+    { href: "/door", label: "Door", key: "door" },
     { href: "/simulation", label: "Simulation", key: "simulation" },
     { href: "/fan", label: "Fan", key: "fan" },
     { href: "/vendor", label: "Vendor", key: "vendor" },

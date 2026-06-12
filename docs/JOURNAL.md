@@ -55,6 +55,7 @@ grep -ri "cold start" docs/journal    # any topic, e.g. the Valiron cold-start i
 
 | Date | File | Focus |
 |---|---|---|
+| 2026-06-12 | [2026-06-12-pilot-system-build.md](journal/2026-06-12-pilot-system-build.md) | FULL pilot app: SQLite, auth, locked wizard, hold→capture payments, QR tickets, waitlist, door, Studio — 18 specs + screenshot walkthrough |
 | 2026-06-12 | [2026-06-12-market-research-strategy.md](journal/2026-06-12-market-research-strategy.md) | Precedent research (Concert Kit!, DICE, Lyte) · potential scenarios · fan-pays-fee model · co-sponsor pilot approved |
 | 2026-06-11 | [2026-06-11-mvp-planning.md](journal/2026-06-11-mvp-planning.md) | Teardown digest · docs system · validation plan + funding stance · fan-terminal/video-script catch-up |
 | 2026-06-01 | [2026-06-01-hackathon-build.md](journal/2026-06-01-hackathon-build.md) | Full hackathon arc: Phases 0–4, x402 stretch, demo prep, Claude Design integration (9 tests green) |

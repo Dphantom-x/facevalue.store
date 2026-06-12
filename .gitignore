@@ -45,6 +45,12 @@ next-env.d.ts
 /playwright-report/
 /playwright/.cache/
 
+# local database
+/data/
+*.db
+*.db-shm
+*.db-wal
+
 # claude code local config
 .claude/
 
