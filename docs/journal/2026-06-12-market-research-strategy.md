@@ -37,6 +37,32 @@
 ## State at end
 - BUSINESS.md updated + changelog; repo pushed. Code untouched (9 tests green as of last run).
 
+## Part 2 (same day) — Concert Kit deep-dive + GTM brainstorm
+
+**Findings (Concert Kit):** launched 2026-04-17 (~8 weeks old); mechanics = code-gating layer (artist
+uploads ticket codes from TM/AXS; fan verifies World ID to unlock; buys on the normal ticketer; the
+purchased ticket stays transferable, nothing at the door); traction = ONE artist (30STM, 5 EU/UK
+cities, 2027, with 2-for-1 verify incentives) + a 1,000-person SF launch party; no public
+pricing/stats; BD-by-email onboarding; reception rocky (Live Nation + Bruno Mars publicly denied TfH's
+partnership claims; "scan your eyeballs" press mockery); not a P&L product (token/VC-funded; exists to
+drive verifications).
+
+**Decisions**
+- **Decision:** Differentiation sentence: "Concert Kit checks who gets in line; FaceValue makes the
+  ticket itself un-scalpable." *Why:* their gated code still yields a normal transferable ticket; we
+  bind the ticket to the nullifier through the door.
+- **Decision:** GTM = "NYC inner circle" — verified-humans-only access layer for the scene; friction
+  reframed as initiation; perks/status over fairness; locals first, tourists later via comedy clubs;
+  device-level World ID (no Orb dependency — NY blocks WLD tokens, not verification).
+- **Decision:** Own-party GTM approved in two steps: co-thrown night with an existing promoter first;
+  solo "Humans Only" party second (conscious cap raise to ~$1.5–3k; breakeven = success; ROI = funnel
+  data + case study + scene cred). *Why:* TfH validated party-as-GTM at their own launch.
+- **Decision:** Underground fashion drops = parallel discovery track (cheapest pilots, same scene,
+  same verified identity), eyes open re: reshippable-merch loophole + Shopify-bot-app sufficiency.
+- **Decision:** Market privacy, never "stealth buying" — "anonymous to everyone, accountable at the
+  door"; no crypto language. *Why:* ZK personhood is a real differentiator vs Ticketmaster's PII
+  hoover; "stealth" reads as evasion.
+
 ## Next / open threads
 - Pilot-hunting playbook: find scalped SMALL events (StubHub/SeatGeek listings above face for <$60
   NYC shows; comedy rooms; RA club nights), DM the promoter with the screenshot of their own show

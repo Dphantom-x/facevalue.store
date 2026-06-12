@@ -31,6 +31,23 @@ personhood and can layer onto an existing stack.
 - **Wedge fork (OPEN):** merch drops = fastest to pilot (a tweet + a link); tickets = structurally
   strongest (identity-bound entry kills resale and the sweatshop loophole). Discovery picks the wedge.
 
+## GTM positioning — "the NYC inner circle" (added 2026-06-12)
+- **Flip the friction:** verifying once isn't a chore, it's initiation — a verified-humans-only access
+  layer for the NYC scene. Status + perks (first dibs, early windows, member pricing), not just fairness.
+  Precedents: DICE's early London scene-app era, AmEx presales, SNKRS, NYC list culture.
+- **Lead with scene locals** (repeat events, community, retention); tourists later via comedy-club
+  partnerships (tourist-heavy + chronically scalped). Device-level World ID (~60s in-app, no Orb) keeps
+  onboarding honest in NYC, where Orb access is pop-up-dependent (NY's crypto rules block WLD tokens,
+  NOT World ID verification).
+- **Two surfaces, one identity:** the same verified membership gates underground fashion drops AND
+  party doors — FaceValue as the scene's verified-access layer, not "a ticketing tool."
+- **Privacy as marketing (not "stealth"):** World ID is zero-knowledge — "anonymous to everyone,
+  accountable at the door." No accounts, no data harvesting, no name — vs Ticketmaster Verified Fan's
+  PII hoover. Never market the crypto; never say "stealth buying" (reads as evasion).
+- **Own-party GTM is validated** — TfH launched Concert Kit with exactly this move (1,000+ verified
+  fans, The Midway SF). Ours: co-throw with an existing promoter first (they bring crowd+ops, we bring
+  ticketing+cash); a solo "Humans Only" party is the v2 stunt (raises spend cap consciously to ~$1.5–3k).
+
 ## Business model
 - **Pilot/GTM pricing (industry-standard direction): the FAN pays, the venue pays $0.** A small
   transparent "fair access fee" (~$1–1.50/ticket) at checkout — still ~95% cheaper than a scalper
@@ -61,12 +78,22 @@ identity makes it fair, the agent makes it effortless · custody → we never ho
 surplus savings/investing · agent taste-purchases.
 
 ## Competition & precedent (researched 2026-06-12)
-- **Tools for Humanity "Concert Kit"** — World's OWN verified-human ticketing product: artists reserve a
-  pool of seats only proof-of-human buyers can access, routed through Ticketmaster/Eventbrite/AXS
-  (Thirty Seconds to Mars reserving verified tickets for the 2027 tour). **Category validated at the
-  top; the major-artist tier is taken. Our lane = the long tail Concert Kit won't service** (indie
-  promoters, club nights, comedy rooms, locals) — and it makes us an ecosystem play (World grants,
-  "Concert Kit for the long tail"), not a lone crusade.
+- **Tools for Humanity "Concert Kit"** (deep intel 2026-06-12) — launched **April 17, 2026** (~8 weeks
+  old) at the "Lift Off" SF event, part of World ID 4.0. **Mechanics: a code-gating layer, not a
+  ticketer** — artist creates a Concert Kit page, sets verification requirements, **uploads ticket codes
+  from their existing platform** (TM/AXS/Eventbrite); fan verifies World ID → unlocks a code → buys on
+  the normal ticketer. **The purchased ticket stays a normal, transferable ticket — nothing at the
+  door.** Traction: exactly ONE named artist (Thirty Seconds to Mars, 5 EU/UK cities, **2027** tour,
+  with 2-for-1 incentives to get fans orb-verified) + a launch party (DJ Pee .Wee at The Midway SF,
+  1,000+ verified fans). No public pricing/stats; onboarding = email-the-team BD. **Reception:** rocky —
+  Live Nation and Bruno Mars' management publicly DENIED partnership claims TfH made (retracted as
+  "miscommunication"); music press mocking ("scan your eyeballs"). Not a P&L product — TfH is
+  token/VC-funded; Concert Kit exists to drive World ID verifications.
+  **Our openings:** (1) they gate the *presale*, we bind the *ticket* through the door —
+  "Concert Kit checks who gets in line; FaceValue makes the ticket itself un-scalpable";
+  (2) their GTM is top-down and slow (first real shows 2027) — the street/long tail is wide open;
+  (3) their brand baggage (orb memes, Bruno Mars stumble) — we present fan-first with World ID under
+  the hood, device-level (no Orb needed).
 - **Riot Games** — ID-gated anti-scalping for the 2026 LoL World Championship → identity-gated
   ticketing is normalizing mainstream.
 - **DICE** — the existence proof: anti-scalping ticketing for independent venues; ~$238M raised,
@@ -129,6 +156,10 @@ surplus savings/investing · agent taste-purchases.
 - Pilot payment rails: Stripe account + payout mechanics for the fee-waived pilot.
 
 ## Changelog
+- **2026-06-12 (later)** — Concert Kit deep intel: 8 weeks old, 1 client (30STM 2027), code-gating only
+  (ticket stays transferable — our door-binding is the differentiator), Bruno Mars/Live Nation denial
+  scandal, not a P&L product. Added "NYC inner circle" GTM positioning (status framing, locals-first,
+  two surfaces one identity, privacy-not-stealth marketing, party-as-GTM validated by TfH's own launch).
 - **2026-06-12** — Market research: TfH **Concert Kit** discovered (validates category, takes the
   major tier; our lane = long tail + World ecosystem). Model shifted to fan-pays-fee for GTM.
   $50–100 co-sponsor carve-out pilot approved. Potential scenarios added.
