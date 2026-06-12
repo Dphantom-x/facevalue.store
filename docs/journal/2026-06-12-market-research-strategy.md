@@ -75,6 +75,32 @@ drive verifications).
   transfer) — the fan-friendly answer to "what if I can't go," and waitlist counts become the vendor
   demand-data product.
 
+## Part 4 (same day) — Concert Kit user-flow teardown + NYC event legality + growth targets
+
+**Findings**
+- Concert Kit fan flow (their own site): download World App → **Orb verification required** ("Complete
+  verification at an orb to unlock access") → unlock an exclusive access code (artist pre-uploads
+  presale codes) → "apply your code on the ticketing platform" → buy a NORMAL ticket on TM/AXS.
+  They bribe through the orb friction ("Humans get a free extra ticket"). They built only: a page, a
+  proof check, a code vending table — no checkout/payments/inventory/door.
+- NYC legality: SLA One-Day Alcohol Permit $26/≥15 days; TPA $250/≥10 business days for 75+ indoor,
+  200+ outdoor in non-assembly spaces (architect letter + fire guards); no legal "abandoned lot" —
+  owner consent + permits or nothing; UFC/boxing PPV unlicensed = up to ~$110k exposure (Joe Hand
+  Promotions); Riot runs official free watch-party programs (apply).
+
+**Decisions**
+- **Decision:** Add **Pilot Mode A "code-gate"** — gate the venue's OWN presale codes behind our
+  World ID check; zero payment/inventory ops for pilot #1. *Why:* steal Concert Kit's lowest-friction
+  integration shape; Mode B (full checkout + door binding) becomes the upsell.
+- **Decision:** Device-level verification stays our consumer default. *Why:* Concert Kit's orb
+  requirement is a geographic chokepoint they must subsidize (2-for-1); device-level converts at
+  small-event stakes.
+- **Decision:** No unpermitted/guerrilla events under the FaceValue brand; party paths = licensed
+  venue first, permitted raw space second. Watch-party content = esports (Riot program) or K-pop
+  streams; never unlicensed PPV.
+- **Decision:** Growth engines locked: @NYCScalpWatch watchdog account, fandom bottom-up pressure,
+  college ambassadors, press angle, reservation-scalping vertical (NY anti-piracy law tailwind).
+
 ## Next / open threads
 - Pilot-hunting playbook: find scalped SMALL events (StubHub/SeatGeek listings above face for <$60
   NYC shows; comedy rooms; RA club nights), DM the promoter with the screenshot of their own show

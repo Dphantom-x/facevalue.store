@@ -47,6 +47,25 @@ personhood and can layer onto an existing stack.
 - **Own-party GTM is validated** — TfH launched Concert Kit with exactly this move (1,000+ verified
   fans, The Midway SF). Ours: co-throw with an existing promoter first (they bring crowd+ops, we bring
   ticketing+cash); a solo "Humans Only" party is the v2 stunt (raises spend cap consciously to ~$1.5–3k).
+- **Party legal guardrails (researched 2026-06-12):** alcohol = licensed venue (easiest) OR NY SLA
+  One-Day Permit ($26, ≥15 days ahead, wholesaler-sourced, max 4/location/yr) OR licensed caterer OR
+  dry; NEVER ticketed-BYOB or "free drinks with ticket" unpermitted. Raw space 75+ indoors / 200+
+  outdoors needs a DOB **TPA** ($250, ≥10 business days, architect letter, fire guard/100). "Abandoned"
+  lots don't exist legally — private lot w/ owner consent (Peerspace ~$500–2k/day) + TPA + sound permit,
+  or don't. **No unpermitted guerrilla events under the FaceValue brand** — our entire venue pitch is
+  "we're the sanctioned ones." Watch parties: UFC/boxing PPV without a commercial license = lawsuit
+  factory (up to ~$110k statutory) — avoid; **esports via Riot's official watch-party programs** (free,
+  apply) is the cheap-rights option; K-pop comeback streams / listening parties are low-risk.
+- **Friction-tolerant target demos (ranked by PROVEN friction behavior):** K-pop stans (fanclub
+  presale culture) · sneakerheads (SNKRS raffle-trained) · TCG collectors (Pokémon restock lines; LGS
+  partners already do 1-per-customer) · Broadway-lottery vets (daily lottery discipline) · sample-sale
+  fashion crowd (paid line-sitters; Telfar Bag-Security precedent) · underground rave/techno
+  (secret-location ritual = extra steps are the culture) · DIY/hardcore (anti-flipper ethos).
+- **Outreach engines:** "@NYCScalpWatch" watchdog account (scripted daily face-vs-resale markups on
+  small NYC shows → audience + inbound + every post is a warm DM) · bottom-up fandom pressure (Discord
+  admins petition promoters for verified allocations) · college ambassadors (NYU/FIT/Columbia) · local
+  press (Hell Gate/Gothamist: "scalper-proof party" story) · reservation-scalping angle (NY Restaurant
+  Reservation Anti-Piracy Act, Dec 2024 — "one human, one reservation" for supper clubs/pop-ups).
 
 ## Business model
 - **Pilot/GTM pricing (industry-standard direction): the FAN pays, the venue pays $0.** A small
@@ -120,6 +139,12 @@ surplus savings/investing · agent taste-purchases.
 - **Validation bar:** ≥3 vendors with concrete lost hours/money AND stated willingness to trade an
   instant sellout for fairness.
 - **Week 3:** Pilot #1 — 20–50 units carved out of a real drop, **free (fee waived) — never paid.**
+- **Pilot Mode A — "code-gate" (zero-integration, learned from Concert Kit 2026-06-12):** the venue
+  exports 30–50 presale/promo codes from THEIR existing ticketer (Eventbrite etc.); we gate the codes
+  behind World ID device-verification on our drop page; fan verifies → unlocks a code → buys on the
+  venue's own checkout. We touch NO payments, NO inventory, NO refunds on pilot #1 — collapses ops
+  risk and the venue ask. Mode B (full FaceValue checkout + door binding) is the v2 upsell once
+  trust exists.
 - **Demand proof:** the vendor willingly tells their fans to pre-verify before the drop.
 - **Funnel gate:** ≥15% verify+purchase completion, instrumented at every step.
 - **Kill/pivot triggers:** no pilot after ~40 genuine attempts, or funnel <15% → pivot (behavioral
