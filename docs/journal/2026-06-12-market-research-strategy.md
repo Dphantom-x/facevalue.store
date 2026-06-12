@@ -63,6 +63,18 @@ drive verifications).
   door"; no crypto language. *Why:* ZK personhood is a real differentiator vs Ticketmaster's PII
   hoover; "stealth" reads as evasion.
 
+## Part 3 (same day) — Landing/site redesign spec
+- Wrote `design/LANDING_REDESIGN_SPEC.md` — full Track-B site architecture + per-page content spec.
+- **Decision:** Root page is fan-first (scene brand), with an unmissable `/venues` path — a promoter
+  judges us by whether their crowd would love it. *Why:* fans are the volume audience; B2B arrives
+  pre-pitched via DM and needs credibility, not a SaaS hero.
+- **Decision:** Page map = `/` (fan brand) · `/circle` (verify-once membership) · `/drop/[event]`
+  (conversion artifact, 5 states incl. pre-drop verify window + sold-out waitlist) · `/venues` (pilot
+  pitch) · `/simulation` retitled "See it live" (proof + sponsor track).
+- **Decision:** Identity-bound tickets get a "return at face value → waitlist" policy (no peer-to-peer
+  transfer) — the fan-friendly answer to "what if I can't go," and waitlist counts become the vendor
+  demand-data product.
+
 ## Next / open threads
 - Pilot-hunting playbook: find scalped SMALL events (StubHub/SeatGeek listings above face for <$60
   NYC shows; comedy rooms; RA club nights), DM the promoter with the screenshot of their own show
