@@ -41,6 +41,20 @@ personhood and can layer onto an existing stack.
   NOT World ID verification).
 - **Two surfaces, one identity:** the same verified membership gates underground fashion drops AND
   party doors — FaceValue as the scene's verified-access layer, not "a ticketing tool."
+- **Friction Dial (validated as core GTM, 2026-06-22):** POP is turn-up/turn-down per drop, so a venue can
+  start at low friction and dial it up only where scalping hurts — directly answers the "you'll deter my
+  buyers" objection (land low-risk, expand on trust). **The code-gated carve-out IS the dial's v1** (full POP
+  on a 30–50-ticket slice, normal sale on the rest). *Caution:* never dial the **pilot's** friction down — the
+  experiment needs friction ON to measure verify-tolerance. A configurable per-drop dial = the next product feature.
+- **Geography (clarified 2026-06-22): vision = every major city / wherever the hype is; PILOT = NYC-first.**
+  Not because the product is geo-bound, but because venue relationships + the founder's physical presence are
+  local leverage, and one clean carve-out answers "do humans verify?" for all cities. Single-city pilots are
+  normal and don't weaken the raise ("proved in NYC + a playbook for the top-20 music cities"); a thin
+  multi-city smear would. Target the hype ✓ — in the home scene first.
+- **2-month aim (set 2026-06-22):** NOT profitability (pilot scale can't, and shouldn't try). Striving for: live
+  product + real World ID + 1–3 NYC carve-outs producing a real **≥15% verify number** + (if it validates) one
+  proof party + a fundable narrative & accelerator / World-ecosystem-grant applications in motion.
+  **Evidence > profit** — the verify-rate is the asset that unlocks funding.
 - **Privacy as marketing (not "stealth"):** World ID is zero-knowledge — "anonymous to everyone,
   accountable at the door." No accounts, no data harvesting, no name — vs Ticketmaster Verified Fan's
   PII hoover. Never market the crypto; never say "stealth buying" (reads as evasion).
