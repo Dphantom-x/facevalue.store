@@ -121,9 +121,13 @@ surplus savings/investing · agent taste-purchases.
 - **TicketSwap / Tixel / Twickets** — fair (capped) resale works as a business: TicketSwap 18M+ users
   on <$10M raised (capital-efficient), Tixel expanded to the US.
 - **Lyte (†2024)** — cautionary: $53M raised, collapsed owing promoters; held money + bad acquisition.
-  Reinforces: never custody funds, never inherit complexity. **(Funding corrected 2026-06-22:
-  DICE raised ~$187–200M total — NOT $238M; 2022 revenue $28.5M on a $51.1M loss; "2025
-  profitability / $1B tickets" is unverified and likely Fever's number, not DICE's.)**
+  Reinforces: never custody funds, never inherit complexity. **(Re-verified 2026-06-22 v2 against
+  primary sources: DICE raised ~$238M all-time — the earlier "$187–200M" was a PARTIAL sum (Series C +
+  2023 round only, excluding pre-2021 funding), so $238M stands. Seed was $1.6M (TechCrunch 2014).
+  2022 revenue is $28.5M *in USD* (DICE files in dollars; "£28.5M/$35.2M" is an aggregator currency
+  mislabel). "2025 profitability / $1B tickets" is unverified content-farm material, not a DICE figure.
+  Strategic read unchanged & sharper: ~$238M burned, no clear profit, sold to Fever → out-ticketing
+  incumbents is a capital furnace; our edge is the personhood layer, not being a better DICE.)**
 - **Also:** EQL (raffles), token-gating; indirect: pre-order windows, dynamic pricing, doing nothing.
 - **The real enemy:** the instant-sellout ego metric — vendors are addicted to "sold out in 1.2s."
 
@@ -229,8 +233,17 @@ surplus savings/investing · agent taste-purchases.
 4. **Kill/pivot:** <15% verify, or no free carve-out after ~40 honest asks → friction is fatal, pivot.
 
 ## Changelog
-- **2026-06-22** — Fact-checked a strategy memo with 5 research agents. Corrected DICE numbers
-  (~$187–200M not $238M; 2022 rev $28.5M; "2025 profitability" unverified). Confirmed World ID
+- **2026-06-22 (v3)** — Built the Phase-1 kill-metric instrument (invite-only code-gate + conversion
+  funnel; ≥15%-verify PASS/below verdict in Studio); 20/20 specs. Chose Railway+SQLite for deploy
+  (`docs/DEPLOY.md`). Added the explicit **funding goal**: strive for VC/angel/grants (not just
+  profitability) — pilot verify-rate = the fundability proof; accelerator (YC) ≈ the "funded + relocate
+  + build freely" dream; World ecosystem grants = non-dilutive thread.
+- **2026-06-22 (v2 — corrected v1)** — Re-checked the disputed DICE numbers against primary sources:
+  **DICE total is ~$238M** (v1's "$187–200M" was a partial sum — wrong; reverted). Seed $1.6M (not $5.6M).
+  2022 revenue **$28.5M USD** ($35.2M was an aggregator £/$ mislabel). "2025 profitability/$1B" unverified
+  content-farm claim. Sam Smith War Child ballot was **2017, not 2014**. Net: original fact-check held on
+  4 of 5; the funding-total correction was itself wrong and is now fixed.
+- **2026-06-22 (v1)** — Fact-checked a strategy memo with 5 research agents. Confirmed World ID
   device-level is legal + non-biometric in NYC (biggest de-risk). MSG breach/Avalo suit real.
   Stripe Connect = direct charges for zero-custody. Fixed venue list (Billy Jones deceased; Trans-Pecos
   on TicketWeb; Elsewhere on Eventbrite). Locked the sequenced code-gate-first pilot plan.

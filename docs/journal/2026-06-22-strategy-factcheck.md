@@ -13,7 +13,13 @@ fabrication, then locked next steps.
 ## Findings (what was TRUE vs FABRICATED)
 - **DICE numbers wrong in the memo:** seed was $1.6M (not $5.6M); total raised ~$187–200M (not $238M);
   2022 revenue $28.5M (not $35.2M; the $51.1M loss is right); "2025 profitability / $1B tickets" is
-  unverified (likely Fever's number). Series A/C/2023 rounds, DeepMind backers, Boiler Room→Superstruct/KKR,
+  unverified (likely Fever's number).
+  - **Correction (same day, v2 — re-verified against primary sources):** the **total is ~$238M after
+    all** — the "$187–200M" here was a *partial* sum (Series C + 2023 round only, excluding pre-2021
+    funding), so this line's "(not $238M)" was wrong; $238M stands (Tracxn + primary-round build-up
+    ≈$232M). Also: 2022 revenue is $28.5M **in USD** (DICE files in dollars; "$35.2M" was an aggregator
+    £/$ mislabel, so the "$28.5M not $35.2M" call was right). Bonus check: the memo's "Sam Smith War
+    Child ballot 2014" is wrong — it was **Sept 2017** (the cited Music Week article is dated 2017). Series A/C/2023 rounds, DeepMind backers, Boiler Room→Superstruct/KKR,
   Fever acquisition (June 5 2025) all CONFIRMED.
 - **DICE US:** Sept 2017 launch = SF+LA (memo said NY); NY came 2019. Brooklyn exclusives real but
   cluster in 2021. "Ticketfly collapse → DICE won Brooklyn" = unproven (3-yr gap). "Dominates Brooklyn"
