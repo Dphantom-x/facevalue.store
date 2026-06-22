@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FaceValue">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>FaceValue — Demo Flow</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;}
+  html,body{margin:0;padding:0;height:100%;background:#000;font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;overflow:hidden;}
+  #app{position:fixed;inset:0;overflow:hidden;background:#000;}
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden;}
+  .screen.active{display:flex;}
+  .top{padding-top:env(safe-area-inset-top);}
+  .grow{flex:1;}
+  .tap{cursor:pointer;}
+  .disabled{opacity:.55;}
+  .is-hidden{display:none !important;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes fv-glow{0%,100%{opacity:.5;}50%{opacity:.85;}}
+  @keyframes fv-dot{0%,100%{opacity:.3;transform:scale(.85);}50%{opacity:1;transform:scale(1);}}
+  @keyframes fv-breathe{0%,100%{transform:scale(1);opacity:.92;}50%{transform:scale(1.04);opacity:1;}}
+  @keyframes fv-pop{0%{opacity:0;transform:scale(.4);}60%{opacity:1;transform:scale(1.12);}100%{opacity:1;transform:scale(1);}}
+  @keyframes fv-stamp{
+    0%{opacity:0;transform:translate(-50%,-50%) rotate(-14deg) scale(2.7);}
+    12%{opacity:0;transform:translate(-50%,-50%) rotate(-14deg) scale(2.7);}
+    19%{opacity:1;transform:translate(-50%,-50%) rotate(-12deg) scale(.9);}
+    24%{transform:translate(-50%,-50%) rotate(-15deg) scale(1.08);}
+    29%{transform:translate(-50%,-50%) rotate(-13.5deg) scale(.98);}
+    34%{opacity:1;transform:translate(-50%,-50%) rotate(-14deg) scale(1);}
+    88%{opacity:1;transform:translate(-50%,-50%) rotate(-14deg) scale(1);}
+    96%{opacity:0;transform:translate(-50%,-50%) rotate(-14deg) scale(1.18);}
+    100%{opacity:0;transform:translate(-50%,-50%) rotate(-14deg) scale(2.7);}
+  }
+  @keyframes fv-stampring{
+    0%,14%{opacity:0;transform:translate(-50%,-50%) rotate(-14deg) scale(.3);}
+    20%{opacity:.5;transform:translate(-50%,-50%) rotate(-14deg) scale(.7);}
+    40%{opacity:0;transform:translate(-50%,-50%) rotate(-14deg) scale(1.5);}
+    100%{opacity:0;transform:translate(-50%,-50%) rotate(-14deg) scale(1.5);}
+  }
+  .btnspin{display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;animation:spin .8s linear infinite;vertical-align:-3px;margin-right:7px;}
+  .qspin{animation:spin 1.1s linear infinite;}
+  .q-frozen .qspin{animation-play-state:paused;}
+  .q-dim{position:absolute;inset:0;background:rgba(90,104,130,0);transition:background .4s;pointer-events:none;z-index:5;}
+  .q-frozen .q-dim{background:rgba(90,104,130,.16);}
+  .q-hint{opacity:0;transition:opacity .35s;}
+  .q-frozen .q-hint{opacity:1;}
+  #refreshing{position:fixed;inset:0;z-index:260;background:#F2F5FB;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:16vh;gap:14px;}
+  #refreshing.show{display:flex;}
+  #refreshing .r{width:34px;height:34px;border-radius:50%;border:3px solid #cdd8ec;border-top-color:#0B4FBE;animation:spin .9s linear infinite;}
+  #refreshing .rt{font-size:13px;font-weight:600;color:#8a93a3;}
+  /* sleep / lock screen (phone "goes to sleep" before the notification, then wakes) */
+  #sleep{position:fixed;inset:0;z-index:180;background:#000;opacity:0;pointer-events:none;transition:opacity .9s ease;}
+  #sleep.show{opacity:1;}
+  #sleep .lock{position:absolute;top:0;left:0;right:0;display:flex;flex-direction:column;align-items:center;padding-top:calc(env(safe-area-inset-top) + 30vh);opacity:0;transition:opacity .6s ease .15s;}
+  #sleep.awake .lock{opacity:1;}
+  #sleep .lock-time{font-size:88px;font-weight:600;color:#fff;letter-spacing:-2.5px;line-height:1;font-family:-apple-system,'SF Pro Display',system-ui,sans-serif;}
+  #sleep .lock-date{font-size:18px;font-weight:500;color:rgba(255,255,255,.72);margin-top:8px;}
+  /* iOS-style notification */
+  #notif{position:fixed;left:0;right:0;top:0;z-index:200;padding:calc(env(safe-area-inset-top) + 8px) 10px 0;transform:translateY(-160%);transition:transform .55s cubic-bezier(.2,.95,.25,1);}
+  #notif.show{transform:translateY(0);}
+  .notif-card{background:rgba(245,245,247,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;padding:12px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 12px 40px rgba(0,0,0,0.28);}
+  .notif-ic{width:38px;height:38px;border-radius:9px;background:#000;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .notif-ic img{width:30px;height:30px;object-fit:contain;}
+  .notif-body{flex:1;min-width:0;}
+  .notif-row{display:flex;align-items:baseline;justify-content:space-between;}
+  .notif-app{font-size:12px;font-weight:700;color:#3a3a3c;letter-spacing:.2px;}
+  .notif-time{font-size:12px;color:#8a8a8e;}
+  .notif-title{font-size:14px;font-weight:700;color:#15171c;margin-top:1px;}
+  .notif-text{font-size:13px;color:#3a3a3c;margin-top:1px;line-height:1.3;}
+  .ctl{position:fixed;width:64px;height:64px;z-index:300;opacity:0;}
+  #ctl-notif{right:0;bottom:0;}
+  #ctl-reset{left:0;bottom:0;}
+
+  /* ---------- responsive: phone (.mview) vs desktop (.dview) ---------- */
+  /* default = phone: show mobile view, hide desktop view. both fill the screen wrapper. */
+  .mview{flex:1;min-height:0;display:flex;flex-direction:column;width:100%;overflow:hidden;}
+  .dview{display:none;}
+  /* desktop / laptop layout */
+  @media (min-width:1024px){
+    html,body,#app{overflow:auto;}
+    .mview{display:none !important;}
+    .dview{flex:1;min-height:0;display:flex;flex-direction:column;width:100%;overflow:auto;}
+    /* the old-way desktop pages are full-window light webpages */
+    #s-onsale,#s-soldout{background:#fff;}
+    #s-queue{background:#F2F5FB;}
+    #s-resale{background:#F4F5F7;}
+    /* desktop top nav bar (shared structure, colors set per-page inline) */
+    .d-nav{height:60px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;}
+    .d-navlinks{display:flex;align-items:center;gap:24px;font-size:14px;font-weight:600;}
+    .d-search{display:flex;align-items:center;gap:9px;width:270px;height:38px;border-radius:9px;padding:0 13px;}
+    /* centered content column for the two-column event pages */
+    .d-wrap{flex:1;width:100%;max-width:1180px;margin:0 auto;display:flex;flex-direction:column;min-height:0;}
+    .d-cols{flex:1;display:flex;gap:30px;padding:26px 36px 40px;min-height:0;}
+    .d-hero{position:relative;height:300px;flex-shrink:0;overflow:hidden;background:#0a0910;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===================== OLD WAY: A1 ON SALE (countdown) ===================== -->
+  <div class="screen active" id="s-onsale" style="background:#fff;">
+
+   <!-- ---------- PHONE ---------- -->
+   <div class="mview">
+    <div class="top" style="background:#0B4FBE;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;color:#fff;flex-shrink:0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;height:34px;">
+        <svg width="11" height="19" viewBox="0 0 11 19" fill="none"><path d="M9.5 1.5 2 9.5l7.5 8" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2 2 2 0 0 0 0-4Z" stroke="#fff" stroke-width="1.7"/><path d="M14 6v12" stroke="#fff" stroke-width="1.7" stroke-dasharray="2 2.4"/></svg>
+          <span style="font-size:19px;font-weight:700;letter-spacing:.2px;">PrimeTix</span>
+        </div>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 7h14l-1.2 9.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 7Z" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 7a3 3 0 0 1 6 0" stroke="#fff" stroke-width="1.7"/></svg>
+      </div>
+    </div>
+    <div style="position:relative;height:26vh;min-height:180px;flex-shrink:0;overflow:hidden;background:#0a0910;">
+      <img src="./hero-tour.png" alt="Tatum Snow — The Epic Odyssey Tour" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 16%;">
+      <div style="position:absolute;left:0;right:0;top:0;height:60px;background:linear-gradient(180deg,rgba(0,0,0,0.45),transparent);"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:78px;background:linear-gradient(180deg,transparent,rgba(8,7,12,0.82));"></div>
+      <div style="position:absolute;top:14px;left:14px;display:inline-flex;align-items:center;gap:6px;padding:6px 11px;background:rgba(8,8,12,0.55);border:1px solid rgba(255,255,255,0.18);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border-radius:999px;">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#FFC24B" stroke-width="2"/><path d="M12 7.5V12l3 2" stroke="#FFC24B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-size:11px;font-weight:800;color:#FFD98A;letter-spacing:.6px;">SALE STARTS SOON</span>
+      </div>
+      <div style="position:absolute;left:16px;bottom:12px;font-size:12px;font-weight:600;color:rgba(255,255,255,0.85);letter-spacing:.4px;">PrimeTix Live presents</div>
+    </div>
+    <div class="grow" style="padding:18px 18px 0;display:flex;flex-direction:column;gap:13px;background:#fff;overflow:hidden;">
+      <div>
+        <div style="font-size:27px;font-weight:800;color:#15171c;letter-spacing:-.4px;line-height:1.05;">Tatum Snow</div>
+        <div style="font-size:14px;font-weight:600;color:#6a6f78;margin-top:4px;">The Epic Odyssey Tour 2026</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:11px;">
+          <div style="width:30px;height:30px;border-radius:8px;background:#EEF3FC;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2.5" stroke="#0B4FBE" stroke-width="1.8"/><path d="M3 9h18M8 3v4M16 3v4" stroke="#0B4FBE" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <span style="font-size:14px;font-weight:600;color:#2b2e34;">Sat, Aug 15, 2026 · 7:00 PM</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;">
+          <div style="width:30px;height:30px;border-radius:8px;background:#EEF3FC;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z" stroke="#0B4FBE" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4" stroke="#0B4FBE" stroke-width="1.8"/></svg></div>
+          <span style="font-size:14px;font-weight:600;color:#2b2e34;">Aurora Stadium · Springfield</span>
+        </div>
+      </div>
+      <div style="height:1px;background:#ECECEF;"></div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#8b9099;letter-spacing:.5px;text-transform:uppercase;">Face value from</div>
+          <div style="font-size:30px;font-weight:800;color:#15171c;letter-spacing:-.5px;margin-top:2px;">$60.00</div>
+        </div>
+        <div style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:#FFF3E6;border:1px solid #FFD9AE;border-radius:999px;">
+          <span style="width:7px;height:7px;border-radius:50%;background:#F08A1D;display:block;"></span>
+          <span style="font-size:12px;font-weight:700;color:#B5641A;white-space:nowrap;">Limited tickets</span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#9a9fa8;margin-top:-4px;">+ $18.40 service &amp; facility fees applied at checkout</div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:2px;flex-wrap:wrap;">
+        <span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:#6a6f78;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#10b256" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified Tickets</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:#6a6f78;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#10b256" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>100% Guarantee</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:#6a6f78;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#10b256" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Mobile entry</span>
+      </div>
+    </div>
+    <div style="flex-shrink:0;border-top:1px solid #E9E9ED;background:#fff;padding:13px 18px calc(env(safe-area-inset-bottom) + 26px);">
+      <!-- WAITING state -->
+      <div class="cd-wait" style="display:flex;flex-direction:column;gap:11px;">
+        <div style="display:flex;align-items:center;gap:13px;background:#F2F3F5;border:1px solid #E6E7EA;border-radius:14px;padding:12px 15px;">
+          <div style="width:38px;height:38px;border-radius:10px;background:#E3E5E9;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="9" rx="2.2" stroke="#7B818C" stroke-width="1.8"/><path d="M8 10V8a4 4 0 0 1 8 0v2" stroke="#7B818C" stroke-width="1.8"/></svg></div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;color:#8A909B;letter-spacing:0.2px;">Tickets unlock in</div>
+            <div style="font-size:13px;font-weight:600;color:#A7ACB5;margin-top:1px;">Stay on this page — sale opens automatically</div>
+          </div>
+          <div style="font-size:26px;font-weight:800;color:#5B616B;letter-spacing:0.5px;font-variant-numeric:tabular-nums;"><span class="cd">0:05</span></div>
+        </div>
+        <button disabled style="width:100%;height:52px;border:none;border-radius:14px;background:#D5D7DC;color:#9398A1;font-size:17px;font-weight:700;letter-spacing:0.2px;cursor:not-allowed;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="9" rx="2.2" stroke="#9398A1" stroke-width="1.9"/><path d="M8 10V8a4 4 0 0 1 8 0v2" stroke="#9398A1" stroke-width="1.9"/></svg>
+          Buy Tickets
+        </button>
+      </div>
+      <!-- READY state -->
+      <div class="cd-ready is-hidden" style="display:flex;align-items:center;gap:14px;">
+        <div style="flex-shrink:0;">
+          <div style="font-size:11px;font-weight:600;color:#9a9fa8;">From</div>
+          <div style="font-size:19px;font-weight:800;color:#15171c;letter-spacing:-0.3px;">$60.00</div>
+        </div>
+        <button class="buyBtn" style="flex:1;height:52px;border:none;border-radius:14px;background:#0B4FBE;color:#fff;font-size:17px;font-weight:700;letter-spacing:0.2px;box-shadow:0 8px 18px -6px rgba(11,79,190,0.6);cursor:pointer;">Buy Tickets</button>
+      </div>
+    </div>
+   </div>
+
+   <!-- ---------- DESKTOP / LAPTOP (A1 On Sale — Laptop) ---------- -->
+   <div class="dview" style="background:#fff;color:#15171c;font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;">
+     <!-- top nav -->
+     <div class="d-nav" style="background:#0B4FBE;">
+       <div style="display:flex;align-items:center;gap:34px;">
+         <div style="display:flex;align-items:center;gap:9px;">
+           <svg width="23" height="23" viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2 2 2 0 0 0 0-4Z" stroke="#fff" stroke-width="1.7"/><path d="M14 6v12" stroke="#fff" stroke-width="1.7" stroke-dasharray="2 2.4"/></svg>
+           <span style="font-size:22px;font-weight:700;color:#fff;letter-spacing:.2px;">PrimeTix</span>
+         </div>
+         <div class="d-navlinks" style="color:rgba(255,255,255,0.92);">
+           <span>Concerts</span><span>Sports</span><span>Arts &amp; Theater</span><span>More</span>
+         </div>
+       </div>
+       <div style="display:flex;align-items:center;gap:18px;">
+         <div class="d-search" style="background:rgba(255,255,255,0.16);">
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="1.8"/><path d="m16.5 16.5 3.5 3.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+           <span style="font-size:13px;color:rgba(255,255,255,0.8);">Search events, artists, venues</span>
+         </div>
+         <span style="font-size:14px;font-weight:700;color:#fff;">Sign In</span>
+         <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="#fff" stroke-width="1.8"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+       </div>
+     </div>
+     <!-- breadcrumbs -->
+     <div style="height:36px;flex-shrink:0;background:#F5F7FA;border-bottom:1px solid #E9EDF2;display:flex;align-items:center;gap:9px;padding:0 36px;font-size:12px;color:#8b9099;font-weight:600;">
+       <span>Concerts</span><span style="color:#c2c6cc;">&rsaquo;</span><span>Pop</span><span style="color:#c2c6cc;">&rsaquo;</span><span style="color:#0B4FBE;">Tatum Snow</span>
+     </div>
+     <!-- hero -->
+     <div class="d-hero">
+       <img src="./hero-tour.png" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 14%;">
+       <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,7,12,0.88) 0%,rgba(8,7,12,0.52) 40%,rgba(8,7,12,0.1) 64%,transparent 100%);"></div>
+       <div style="position:absolute;left:0;right:0;bottom:0;height:90px;background:linear-gradient(180deg,transparent,rgba(8,7,12,0.82));"></div>
+       <div style="position:absolute;top:20px;left:36px;display:inline-flex;align-items:center;gap:7px;padding:7px 13px;background:rgba(8,8,12,0.55);border:1px solid rgba(255,255,255,0.2);border-radius:999px;">
+         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#FFC24B" stroke-width="2"/><path d="M12 7.5V12l3 2" stroke="#FFC24B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+         <span style="font-size:12px;font-weight:800;color:#FFD98A;letter-spacing:.6px;">SALE STARTS SOON</span>
+       </div>
+       <div style="position:absolute;left:36px;bottom:22px;">
+         <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.82);letter-spacing:.4px;margin-bottom:7px;">PrimeTix Live presents</div>
+         <div style="font-size:44px;font-weight:800;color:#fff;letter-spacing:-.9px;line-height:1;">Tatum Snow</div>
+         <div style="font-size:17px;font-weight:600;color:rgba(255,255,255,0.9);margin-top:9px;">The Epic Odyssey Tour 2026</div>
+       </div>
+     </div>
+     <!-- two-column body -->
+     <div class="d-wrap">
+       <div class="d-cols">
+         <!-- left: details + price levels -->
+         <div style="flex:1;display:flex;flex-direction:column;gap:18px;min-width:0;">
+           <div style="display:flex;gap:13px;">
+             <div style="flex:1;border:1px solid #ECEEF1;border-radius:12px;padding:13px 15px;display:flex;align-items:center;gap:12px;">
+               <div style="width:36px;height:36px;border-radius:9px;background:#EEF3FC;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2.5" stroke="#0B4FBE" stroke-width="1.8"/><path d="M3 9h18M8 3v4M16 3v4" stroke="#0B4FBE" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+               <div><div style="font-size:11px;font-weight:700;color:#9aa0a8;letter-spacing:.4px;">DATE</div><div style="font-size:13.5px;font-weight:700;margin-top:1px;">Sat, Aug 15, 2026</div></div>
+             </div>
+             <div style="flex:1;border:1px solid #ECEEF1;border-radius:12px;padding:13px 15px;display:flex;align-items:center;gap:12px;">
+               <div style="width:36px;height:36px;border-radius:9px;background:#EEF3FC;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z" stroke="#0B4FBE" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4" stroke="#0B4FBE" stroke-width="1.8"/></svg></div>
+               <div><div style="font-size:11px;font-weight:700;color:#9aa0a8;letter-spacing:.4px;">VENUE</div><div style="font-size:13.5px;font-weight:700;margin-top:1px;">Aurora Stadium</div></div>
+             </div>
+             <div style="flex:1;border:1px solid #ECEEF1;border-radius:12px;padding:13px 15px;display:flex;align-items:center;gap:12px;">
+               <div style="width:36px;height:36px;border-radius:9px;background:#EEF3FC;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#0B4FBE" stroke-width="1.8"/><path d="M12 7v5l3.5 2" stroke="#0B4FBE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+               <div><div style="font-size:11px;font-weight:700;color:#9aa0a8;letter-spacing:.4px;">DOORS</div><div style="font-size:13.5px;font-weight:700;margin-top:1px;">6:00 PM &middot; 7:00 PM</div></div>
+             </div>
+           </div>
+           <div style="border:1px solid #ECEEF1;border-radius:14px;overflow:hidden;">
+             <div style="padding:14px 18px;border-bottom:1px solid #ECEEF1;display:flex;align-items:center;justify-content:space-between;">
+               <span style="font-size:16px;font-weight:800;">Choose your tickets</span>
+               <span style="font-size:12.5px;font-weight:700;color:#8b9099;">3 price levels</span>
+             </div>
+             <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #F2F3F5;">
+               <div><div style="font-size:14.5px;font-weight:700;">GA Floor — Standing</div><div style="font-size:12px;color:#8b9099;margin-top:2px;">Section A &middot; General admission</div></div>
+               <div style="display:flex;align-items:center;gap:16px;"><span style="font-size:16px;font-weight:800;">$60.00</span><span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:#8A909B;background:#F2F3F5;padding:6px 11px;border-radius:999px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="9" rx="2.2" stroke="#8A909B" stroke-width="1.9"/><path d="M8 10V8a4 4 0 0 1 8 0v2" stroke="#8A909B" stroke-width="1.9"/></svg>Unlocks at sale</span></div>
+             </div>
+             <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #F2F3F5;">
+               <div><div style="font-size:14.5px;font-weight:700;">Lower Bowl — Reserved</div><div style="font-size:12px;color:#8b9099;margin-top:2px;">Sections 110–118 &middot; Seated</div></div>
+               <div style="display:flex;align-items:center;gap:16px;"><span style="font-size:16px;font-weight:800;">$60.00</span><span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:#8A909B;background:#F2F3F5;padding:6px 11px;border-radius:999px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="9" rx="2.2" stroke="#8A909B" stroke-width="1.9"/><path d="M8 10V8a4 4 0 0 1 8 0v2" stroke="#8A909B" stroke-width="1.9"/></svg>Unlocks at sale</span></div>
+             </div>
+             <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px;">
+               <div><div style="font-size:14.5px;font-weight:700;">Upper Level — Reserved</div><div style="font-size:12px;color:#8b9099;margin-top:2px;">Sections 310–330 &middot; Seated</div></div>
+               <div style="display:flex;align-items:center;gap:16px;"><span style="font-size:16px;font-weight:800;">$60.00</span><span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:#8A909B;background:#F2F3F5;padding:6px 11px;border-radius:999px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="9" rx="2.2" stroke="#8A909B" stroke-width="1.9"/><path d="M8 10V8a4 4 0 0 1 8 0v2" stroke="#8A909B" stroke-width="1.9"/></svg>Unlocks at sale</span></div>
+             </div>
+           </div>
+         </div>
+         <!-- right: sticky buy sidebar -->
+         <div style="width:336px;flex-shrink:0;">
+           <div style="border:1px solid #E6E9ED;border-radius:16px;padding:20px;box-shadow:0 10px 30px -16px rgba(0,0,0,0.18);">
+             <div style="font-size:12px;font-weight:700;color:#8b9099;letter-spacing:.5px;text-transform:uppercase;">Face value from</div>
+             <div style="font-size:34px;font-weight:800;letter-spacing:-.6px;margin-top:2px;">$60.00</div>
+             <div style="font-size:12px;color:#9a9fa8;margin-top:3px;">+ $18.40 service &amp; facility fees</div>
+             <div style="height:1px;background:#ECECEF;margin:16px 0;"></div>
+             <div class="cd-wait" style="background:#F2F3F5;border:1px solid #E6E7EA;border-radius:14px;padding:16px;text-align:center;margin-bottom:13px;">
+               <div style="display:flex;align-items:center;justify-content:center;gap:7px;color:#8A909B;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="9" rx="2.2" stroke="#8A909B" stroke-width="1.9"/><path d="M8 10V8a4 4 0 0 1 8 0v2" stroke="#8A909B" stroke-width="1.9"/></svg><span style="font-size:11.5px;font-weight:800;letter-spacing:.6px;">TICKETS UNLOCK IN</span></div>
+               <div style="font-size:40px;font-weight:800;color:#5B616B;letter-spacing:1px;font-variant-numeric:tabular-nums;margin-top:6px;line-height:1;"><span class="cd">0:05</span></div>
+               <div style="font-size:12px;font-weight:600;color:#A7ACB5;margin-top:7px;">Stay on this page — sale opens automatically</div>
+             </div>
+             <button class="buyBtn disabled" style="width:100%;height:54px;border:none;border-radius:13px;background:#0B4FBE;color:#fff;font-size:17px;font-weight:700;letter-spacing:.2px;box-shadow:0 8px 18px -6px rgba(11,79,190,0.6);display:flex;align-items:center;justify-content:center;gap:8px;">Buy Tickets</button>
+             <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px;">
+               <span style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:#6a6f78;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#10b256" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>100% Verified Tickets</span>
+               <span style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:#6a6f78;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#10b256" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Guaranteed entry or your money back</span>
+               <span style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:#6a6f78;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#10b256" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Instant mobile delivery</span>
+             </div>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+
+  </div>
+
+  <!-- ===================== OLD WAY: D QUEUE (freezes after 5s -> pull to refresh) ===================== -->
+  <div class="screen" id="s-queue" style="background:#F2F5FB;">
+
+   <!-- ---------- PHONE ---------- -->
+   <div class="mview" style="background:#F2F5FB;">
+    <div class="top" style="background:#0B4FBE;padding:calc(env(safe-area-inset-top) + 14px) 16px 14px;flex-shrink:0;display:flex;justify-content:center;">
+      <div style="display:flex;align-items:center;gap:7px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2 2 2 0 0 0 0-4Z" stroke="#fff" stroke-width="1.7"/><path d="M14 6v12" stroke="#fff" stroke-width="1.7" stroke-dasharray="2 2.4"/></svg><span style="font-size:17px;font-weight:700;color:#fff;letter-spacing:.2px;">PrimeTix</span></div>
+    </div>
+    <div class="grow" style="position:relative;background:#F2F5FB;display:flex;flex-direction:column;align-items:center;padding:24px 28px 0;">
+      <div class="q-hint" style="display:flex;align-items:center;gap:7px;background:#FBE3E3;border:1px solid #F3C0C0;border-radius:999px;padding:7px 14px;margin-bottom:16px;"><span style="width:7px;height:7px;border-radius:50%;background:#D11A2A;"></span><span style="font-size:12px;font-weight:700;color:#C0202E;">Connection lost · pull down to refresh ↓</span></div>
+      <div style="position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:24px;">
+        <div style="position:absolute;inset:0;border-radius:50%;border:5px solid #DCE6F6;"></div>
+        <div class="qspin" style="position:absolute;inset:0;border-radius:50%;border:5px solid transparent;border-top-color:#0B4FBE;border-right-color:#0B4FBE;"></div>
+        <svg width="42" height="42" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="#0B4FBE" stroke-width="1.8"/><circle cx="16.5" cy="9" r="2.4" stroke="#9bb6e6" stroke-width="1.8"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="#0B4FBE" stroke-width="1.8" stroke-linecap="round"/><path d="M15 19c0-2.4 1.6-4.2 4-4.4" stroke="#9bb6e6" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+      <div style="font-size:15px;font-weight:700;color:#5b6470;letter-spacing:.2px;">You're in line</div>
+      <div style="font-size:13px;font-weight:600;color:#8a93a3;margin-top:2px;">Your place is reserved</div>
+      <div style="font-size:58px;font-weight:800;color:#0B4FBE;letter-spacing:-2px;margin-top:18px;line-height:1;">#14,213</div>
+      <div style="font-size:13px;font-weight:600;color:#8a93a3;margin-top:6px;">people ahead of you</div>
+      <div style="width:100%;margin-top:26px;"><div style="height:8px;background:#E1E8F4;border-radius:6px;overflow:hidden;"><div style="width:7%;height:100%;background:#0B4FBE;border-radius:6px;"></div></div><div style="display:flex;justify-content:space-between;margin-top:8px;"><span style="font-size:11.5px;font-weight:600;color:#9aa3b2;">Started 36 min ago</span><span style="font-size:11.5px;font-weight:700;color:#5b6470;">7% through</span></div></div>
+      <div style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #E2E8F2;border-radius:999px;padding:9px 16px;margin-top:22px;box-shadow:0 2px 6px rgba(11,79,190,0.06);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#0B4FBE" stroke-width="1.8"/><path d="M12 7v5l3.5 2" stroke="#0B4FBE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:13px;font-weight:700;color:#1f2937;white-space:nowrap;">Estimated wait: 47 minutes</span></div>
+      <div style="display:flex;align-items:flex-start;gap:9px;background:#FFF6E8;border:1px solid #FBE3B8;border-radius:12px;padding:12px 14px;margin-top:auto;margin-bottom:calc(env(safe-area-inset-bottom) + 24px);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px;"><path d="M12 3 2.5 20h19L12 3Z" stroke="#C8860D" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4" stroke="#C8860D" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#C8860D"/></svg><span style="font-size:12px;font-weight:600;color:#9a6a12;line-height:1.45;">Do not refresh or close this page. Leaving the queue will forfeit your place and you'll start again at the back of the line.</span></div>
+    </div>
+   </div>
+
+   <!-- ---------- DESKTOP / LAPTOP (D Queue — Laptop) ---------- -->
+   <div class="dview" style="background:#F2F5FB;color:#15171c;font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;">
+     <div style="height:60px;flex-shrink:0;background:#0B4FBE;display:flex;align-items:center;justify-content:center;">
+       <div style="display:flex;align-items:center;gap:8px;">
+         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2 2 2 0 0 0 0-4Z" stroke="#fff" stroke-width="1.7"/><path d="M14 6v12" stroke="#fff" stroke-width="1.7" stroke-dasharray="2 2.4"/></svg>
+         <span style="font-size:19px;font-weight:700;color:#fff;letter-spacing:.2px;">PrimeTix</span>
+       </div>
+     </div>
+     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;min-height:0;">
+       <div class="q-hint" style="display:flex;align-items:center;gap:7px;background:#FBE3E3;border:1px solid #F3C0C0;border-radius:999px;padding:8px 16px;"><span style="width:7px;height:7px;border-radius:50%;background:#D11A2A;"></span><span style="font-size:13px;font-weight:700;color:#C0202E;">Connection lost · click to refresh ↻</span></div>
+       <div style="width:560px;max-width:92vw;background:#fff;border-radius:22px;box-shadow:0 30px 70px -30px rgba(11,79,190,0.35),0 1px 0 #EBEFF6;padding:44px 48px;display:flex;flex-direction:column;align-items:center;">
+         <div style="position:relative;width:108px;height:108px;display:flex;align-items:center;justify-content:center;margin-bottom:22px;">
+           <div style="position:absolute;inset:0;border-radius:50%;border:5px solid #DCE6F6;"></div>
+           <div class="qspin" style="position:absolute;inset:0;border-radius:50%;border:5px solid transparent;border-top-color:#0B4FBE;border-right-color:#0B4FBE;"></div>
+           <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="#0B4FBE" stroke-width="1.8"/><circle cx="16.5" cy="9" r="2.4" stroke="#9bb6e6" stroke-width="1.8"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="#0B4FBE" stroke-width="1.8" stroke-linecap="round"/><path d="M15 19c0-2.4 1.6-4.2 4-4.4" stroke="#9bb6e6" stroke-width="1.8" stroke-linecap="round"/></svg>
+         </div>
+         <div style="font-size:16px;font-weight:700;color:#5b6470;">You're in line</div>
+         <div style="font-size:13px;font-weight:600;color:#8a93a3;margin-top:3px;">Your place is reserved — please don't refresh</div>
+         <div style="font-size:64px;font-weight:800;color:#0B4FBE;letter-spacing:-2px;margin-top:18px;line-height:1;">#14,213</div>
+         <div style="font-size:13px;font-weight:600;color:#8a93a3;margin-top:6px;">people ahead of you</div>
+         <div style="width:100%;margin-top:26px;">
+           <div style="height:9px;background:#E1E8F4;border-radius:6px;overflow:hidden;"><div style="width:7%;height:100%;background:#0B4FBE;border-radius:6px;"></div></div>
+           <div style="display:flex;justify-content:space-between;margin-top:9px;"><span style="font-size:12px;font-weight:600;color:#9aa3b2;">Started 36 min ago</span><span style="font-size:12px;font-weight:700;color:#5b6470;">7% through</span></div>
+         </div>
+         <div style="display:inline-flex;align-items:center;gap:8px;background:#F4F7FC;border:1px solid #E2E8F2;border-radius:999px;padding:10px 18px;margin-top:22px;">
+           <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#0B4FBE" stroke-width="1.8"/><path d="M12 7v5l3.5 2" stroke="#0B4FBE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+           <span style="font-size:13px;font-weight:700;color:#1f2937;">Estimated wait: 47 minutes</span>
+         </div>
+         <div style="display:flex;align-items:flex-start;gap:10px;background:#FFF6E8;border:1px solid #FBE3B8;border-radius:12px;padding:13px 16px;margin-top:24px;">
+           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px;"><path d="M12 3 2.5 20h19L12 3Z" stroke="#C8860D" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4" stroke="#C8860D" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#C8860D"/></svg>
+           <span style="font-size:12.5px;font-weight:600;color:#9a6a12;line-height:1.45;">Do not refresh or close this page. Leaving the queue will forfeit your place and you'll start again at the back of the line.</span>
+         </div>
+       </div>
+     </div>
+   </div>
+
+   <div class="q-dim"></div>
+  </div>
+
+  <!-- ===================== OLD WAY: A2 SOLD OUT ===================== -->
+  <div class="screen tap" id="s-soldout" data-next="s-resale" style="background:#fff;">
+
+   <!-- ---------- PHONE ---------- -->
+   <div class="mview">
+    <div class="top" style="background:#0B4FBE;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;color:#fff;flex-shrink:0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;height:34px;">
+        <svg width="11" height="19" viewBox="0 0 11 19" fill="none"><path d="M9.5 1.5 2 9.5l7.5 8" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2 2 2 0 0 0 0-4Z" stroke="#fff" stroke-width="1.7"/><path d="M14 6v12" stroke="#fff" stroke-width="1.7" stroke-dasharray="2 2.4"/></svg>
+          <span style="font-size:19px;font-weight:700;letter-spacing:.2px;">PrimeTix</span>
+        </div>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 7h14l-1.2 9.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 7Z" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 7a3 3 0 0 1 6 0" stroke="#fff" stroke-width="1.7"/></svg>
+      </div>
+    </div>
+    <div style="position:relative;height:24vh;min-height:170px;flex-shrink:0;overflow:hidden;background:#0a0910;">
+      <img src="./hero-tour.png" alt="Tatum Snow — The Epic Odyssey Tour" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 16%;">
+      <div style="position:absolute;left:0;right:0;top:0;height:60px;background:linear-gradient(180deg,rgba(0,0,0,0.42),transparent);"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:78px;background:linear-gradient(180deg,transparent,rgba(8,7,12,0.82));"></div>
+      <div style="position:absolute;left:16px;bottom:12px;font-size:12px;font-weight:600;color:rgba(255,255,255,0.85);letter-spacing:.4px;">PrimeTix Live presents</div>
+      <div style="position:absolute;top:47%;left:50%;width:228px;height:86px;border:3px solid #ED1C24;border-radius:12px;transform:translate(-50%,-50%) rotate(-14deg);animation:fv-stampring 3.2s ease-out infinite;opacity:0;z-index:2;"></div>
+      <div style="position:absolute;top:47%;left:50%;transform:translate(-50%,-50%) rotate(-14deg);animation:fv-stamp 3.2s cubic-bezier(.2,.7,.25,1) infinite;z-index:3;will-change:transform,opacity;">
+        <div style="border:4px solid #ED1C24;color:#ED1C24;border-radius:10px;padding:8px 18px;font-weight:900;font-size:32px;letter-spacing:3px;line-height:1;box-shadow:inset 0 0 0 2px #ED1C24,0 2px 8px rgba(0,0,0,0.25);text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;white-space:nowrap;">SOLD OUT</div>
+      </div>
+    </div>
+    <div class="grow" style="padding:18px 18px 0;display:flex;flex-direction:column;gap:13px;background:#fff;overflow:hidden;">
+      <div>
+        <div style="font-size:27px;font-weight:800;color:#15171c;letter-spacing:-.4px;line-height:1.05;">Tatum Snow</div>
+        <div style="font-size:14px;font-weight:600;color:#6a6f78;margin-top:4px;">The Epic Odyssey Tour 2026</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:11px;">
+          <div style="width:30px;height:30px;border-radius:8px;background:#F1F1F3;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2.5" stroke="#9a9fa8" stroke-width="1.8"/><path d="M3 9h18M8 3v4M16 3v4" stroke="#9a9fa8" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <span style="font-size:14px;font-weight:600;color:#6a6f78;">Sat, Aug 15, 2026 · 7:00 PM</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;">
+          <div style="width:30px;height:30px;border-radius:8px;background:#F1F1F3;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z" stroke="#9a9fa8" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4" stroke="#9a9fa8" stroke-width="1.8"/></svg></div>
+          <span style="font-size:14px;font-weight:600;color:#6a6f78;">Aurora Stadium · Springfield</span>
+        </div>
+      </div>
+      <div style="height:1px;background:#ECECEF;"></div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#8b9099;letter-spacing:.5px;text-transform:uppercase;">Face value</div>
+          <div style="font-size:30px;font-weight:800;color:#15171c;letter-spacing:-.5px;margin-top:2px;">$60.00</div>
+        </div>
+        <div style="display:inline-flex;align-items:center;gap:7px;padding:7px 13px;background:#FBE9EA;border:1px solid #F3C7CB;border-radius:999px;">
+          <span style="width:7px;height:7px;border-radius:50%;background:#D11A2A;display:block;"></span>
+          <span style="font-size:12px;font-weight:800;color:#C02534;letter-spacing:.4px;white-space:nowrap;">SOLD OUT</span>
+        </div>
+      </div>
+      <div style="background:#F7F8FA;border:1px solid #EDEEF1;border-radius:12px;padding:13px 14px;"><div style="font-size:13px;font-weight:600;color:#5b606a;line-height:1.45;">Every ticket sold at face value in under a minute. Join the waiting list and we'll alert you if seats are released.</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:2px;"><span style="font-size:13.5px;font-weight:700;color:#0B4FBE;">Looking for tickets? See resale options</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#0B4FBE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+    <div style="flex-shrink:0;border-top:1px solid #E9E9ED;background:#fff;padding:13px 18px calc(env(safe-area-inset-bottom) + 26px);display:flex;flex-direction:column;gap:9px;">
+      <button style="width:100%;height:52px;border:none;border-radius:14px;background:#D5D7DC;color:#8b9099;font-size:17px;font-weight:700;letter-spacing:.2px;">Sold Out</button>
+      <button style="width:100%;height:46px;border:1.5px solid #0B4FBE;border-radius:13px;background:#fff;color:#0B4FBE;font-size:15px;font-weight:700;">Join the Waiting List</button>
+    </div>
+   </div>
+
+   <!-- ---------- DESKTOP / LAPTOP (A2 Sold Out — Laptop) ---------- -->
+   <div class="dview" style="background:#fff;color:#15171c;font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;">
+     <!-- top nav -->
+     <div class="d-nav" style="background:#0B4FBE;">
+       <div style="display:flex;align-items:center;gap:34px;">
+         <div style="display:flex;align-items:center;gap:9px;">
+           <svg width="23" height="23" viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2 2 2 0 0 0 0-4Z" stroke="#fff" stroke-width="1.7"/><path d="M14 6v12" stroke="#fff" stroke-width="1.7" stroke-dasharray="2 2.4"/></svg>
+           <span style="font-size:22px;font-weight:700;color:#fff;letter-spacing:.2px;">PrimeTix</span>
+         </div>
+         <div class="d-navlinks" style="color:rgba(255,255,255,0.92);">
+           <span>Concerts</span><span>Sports</span><span>Arts &amp; Theater</span><span>More</span>
+         </div>
+       </div>
+       <div style="display:flex;align-items:center;gap:18px;">
+         <div class="d-search" style="background:rgba(255,255,255,0.16);">
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="1.8"/><path d="m16.5 16.5 3.5 3.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+           <span style="font-size:13px;color:rgba(255,255,255,0.8);">Search events, artists, venues</span>
+         </div>
+         <span style="font-size:14px;font-weight:700;color:#fff;">Sign In</span>
+         <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="#fff" stroke-width="1.8"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+       </div>
+     </div>
+     <!-- breadcrumbs -->
+     <div style="height:36px;flex-shrink:0;background:#F5F7FA;border-bottom:1px solid #E9EDF2;display:flex;align-items:center;gap:9px;padding:0 36px;font-size:12px;color:#8b9099;font-weight:600;">
+       <span>Concerts</span><span style="color:#c2c6cc;">&rsaquo;</span><span>Pop</span><span style="color:#c2c6cc;">&rsaquo;</span><span style="color:#0B4FBE;">Tatum Snow</span>
+     </div>
+     <!-- hero with SOLD OUT stamp -->
+     <div class="d-hero">
+       <img src="./hero-tour.png" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 14%;">
+       <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,7,12,0.88) 0%,rgba(8,7,12,0.52) 40%,rgba(8,7,12,0.1) 64%,transparent 100%);"></div>
+       <div style="position:absolute;left:0;right:0;bottom:0;height:90px;background:linear-gradient(180deg,transparent,rgba(8,7,12,0.82));"></div>
+       <div style="position:absolute;left:36px;bottom:22px;">
+         <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.82);letter-spacing:.4px;margin-bottom:7px;">PrimeTix Live presents</div>
+         <div style="font-size:44px;font-weight:800;color:#fff;letter-spacing:-.9px;line-height:1;">Tatum Snow</div>
+         <div style="font-size:17px;font-weight:600;color:rgba(255,255,255,0.9);margin-top:9px;">The Epic Odyssey Tour 2026</div>
+       </div>
+       <div style="position:absolute;top:50%;left:61%;width:430px;height:150px;border:5px solid #ED1C24;border-radius:16px;transform:translate(-50%,-50%) rotate(-14deg);animation:fv-stampring 3.2s ease-out infinite;opacity:0;z-index:2;"></div>
+       <div style="position:absolute;top:50%;left:61%;transform:translate(-50%,-50%) rotate(-14deg);animation:fv-stamp 3.2s cubic-bezier(.2,.7,.25,1) infinite;z-index:3;will-change:transform,opacity;">
+         <div style="border:6px solid #ED1C24;color:#ED1C24;border-radius:14px;padding:12px 28px;font-weight:900;font-size:56px;letter-spacing:5px;line-height:1;box-shadow:inset 0 0 0 3px #ED1C24,0 3px 12px rgba(0,0,0,0.3);text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;white-space:nowrap;">SOLD OUT</div>
+       </div>
+     </div>
+     <!-- two-column body -->
+     <div class="d-wrap">
+       <div class="d-cols">
+         <!-- left: details + sold-out price levels -->
+         <div style="flex:1;display:flex;flex-direction:column;gap:18px;min-width:0;">
+           <div style="display:flex;gap:13px;">
+             <div style="flex:1;border:1px solid #ECEEF1;border-radius:12px;padding:13px 15px;display:flex;align-items:center;gap:12px;">
+               <div style="width:36px;height:36px;border-radius:9px;background:#EEF3FC;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2.5" stroke="#0B4FBE" stroke-width="1.8"/><path d="M3 9h18M8 3v4M16 3v4" stroke="#0B4FBE" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+               <div><div style="font-size:11px;font-weight:700;color:#9aa0a8;letter-spacing:.4px;">DATE</div><div style="font-size:13.5px;font-weight:700;margin-top:1px;">Sat, Aug 15, 2026</div></div>
+             </div>
+             <div style="flex:1;border:1px solid #ECEEF1;border-radius:12px;padding:13px 15px;display:flex;align-items:center;gap:12px;">
+               <div style="width:36px;height:36px;border-radius:9px;background:#EEF3FC;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z" stroke="#0B4FBE" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4" stroke="#0B4FBE" stroke-width="1.8"/></svg></div>
+               <div><div style="font-size:11px;font-weight:700;color:#9aa0a8;letter-spacing:.4px;">VENUE</div><div style="font-size:13.5px;font-weight:700;margin-top:1px;">Aurora Stadium</div></div>
+             </div>
+             <div style="flex:1;border:1px solid #ECEEF1;border-radius:12px;padding:13px 15px;display:flex;align-items:center;gap:12px;">
+               <div style="width:36px;height:36px;border-radius:9px;background:#EEF3FC;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#0B4FBE" stroke-width="1.8"/><path d="M12 7v5l3.5 2" stroke="#0B4FBE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+               <div><div style="font-size:11px;font-weight:700;color:#9aa0a8;letter-spacing:.4px;">DOORS</div><div style="font-size:13.5px;font-weight:700;margin-top:1px;">6:00 PM &middot; 7:00 PM</div></div>
+             </div>
+           </div>
+           <div style="border:1px solid #ECEEF1;border-radius:14px;overflow:hidden;">
+             <div style="padding:14px 18px;border-bottom:1px solid #ECEEF1;display:flex;align-items:center;justify-content:space-between;">
+               <span style="font-size:16px;font-weight:800;">Choose your tickets</span>
+               <span style="font-size:11.5px;font-weight:800;color:#C02534;background:#FBE9EA;border:1px solid #F3C7CB;padding:5px 11px;border-radius:999px;">Sold Out</span>
+             </div>
+             <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #F2F3F5;">
+               <div><div style="font-size:14.5px;font-weight:700;">GA Floor — Standing</div><div style="font-size:12px;color:#8b9099;margin-top:2px;">Section A &middot; General admission</div></div>
+               <span style="font-size:12px;font-weight:800;color:#C02534;background:#FBE9EA;border:1px solid #F3C7CB;padding:6px 12px;border-radius:999px;">Sold Out</span>
+             </div>
+             <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #F2F3F5;">
+               <div><div style="font-size:14.5px;font-weight:700;">Lower Bowl — Reserved</div><div style="font-size:12px;color:#8b9099;margin-top:2px;">Sections 110–118 &middot; Seated</div></div>
+               <span style="font-size:12px;font-weight:800;color:#C02534;background:#FBE9EA;border:1px solid #F3C7CB;padding:6px 12px;border-radius:999px;">Sold Out</span>
+             </div>
+             <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px;">
+               <div><div style="font-size:14.5px;font-weight:700;">Upper Level — Reserved</div><div style="font-size:12px;color:#8b9099;margin-top:2px;">Sections 310–330 &middot; Seated</div></div>
+               <span style="font-size:12px;font-weight:800;color:#C02534;background:#FBE9EA;border:1px solid #F3C7CB;padding:6px 12px;border-radius:999px;">Sold Out</span>
+             </div>
+           </div>
+         </div>
+         <!-- right: sold-out sidebar + see-resale link -->
+         <div style="width:336px;flex-shrink:0;">
+           <div style="border:1px solid #E6E9ED;border-radius:16px;padding:20px;box-shadow:0 10px 30px -16px rgba(0,0,0,0.18);">
+             <div style="font-size:12px;font-weight:700;color:#8b9099;letter-spacing:.5px;text-transform:uppercase;">Face value</div>
+             <div style="font-size:34px;font-weight:800;letter-spacing:-.6px;margin-top:2px;color:#15171c;">$60.00</div>
+             <div style="background:#F7F8FA;border:1px solid #EDEEF1;border-radius:12px;padding:13px 14px;margin-top:14px;">
+               <div style="font-size:13px;font-weight:600;color:#5b606a;line-height:1.45;">Tickets are no longer available from PrimeTix. Join the waiting list and we'll notify you if seats are released.</div>
+             </div>
+             <button style="width:100%;height:52px;border:none;border-radius:13px;background:#D5D7DC;color:#8b9099;font-size:16px;font-weight:700;margin-top:14px;">Sold Out</button>
+             <button style="width:100%;height:48px;border:1.5px solid #0B4FBE;border-radius:12px;background:#fff;color:#0B4FBE;font-size:14.5px;font-weight:700;cursor:pointer;margin-top:10px;">Join the Waiting List</button>
+             <div class="tap" data-next="s-resale" style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;cursor:pointer;"><span style="font-size:13px;font-weight:700;color:#0B4FBE;">Looking for tickets? See resale options</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#0B4FBE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+
+  </div>
+
+  <!-- ===================== OLD WAY: B1 RESALE ($1,200) ===================== -->
+  <div class="screen tap" id="s-resale" data-next="s-fvdrop" style="background:#F4F5F7;">
+
+   <!-- ---------- PHONE (B1 Resale List) ---------- -->
+   <div class="mview" style="background:#F4F5F7;">
+    <div style="background:#fff;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;flex-shrink:0;border-bottom:1px solid #ECEEF1;">
+      <div style="display:flex;align-items:center;justify-content:space-between;height:32px;">
+        <svg width="11" height="19" viewBox="0 0 11 19" fill="none"><path d="M9.5 1.5 2 9.5l7.5 8" stroke="#15171c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2.5" fill="#1746C8"/><path d="M9 6v12" stroke="#fff" stroke-width="1.5" stroke-dasharray="2 2"/></svg>
+          <span style="font-size:17px;font-weight:800;color:#15171c;letter-spacing:-.4px;">SeatStreet</span>
+        </div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#15171c" stroke-width="1.8"/><path d="m16.5 16.5 3.5 3.5" stroke="#15171c" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+    <div style="background:#fff;padding:13px 16px 14px;flex-shrink:0;display:flex;gap:12px;border-bottom:1px solid #ECEEF1;">
+      <div style="width:52px;height:52px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#0a0910;"><img src="./hero-tour.png" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 14%;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:15px;font-weight:800;color:#15171c;letter-spacing:-.2px;">Tatum Snow · The Epic Odyssey Tour</div>
+        <div style="font-size:12px;color:#737983;margin-top:3px;">Aurora Stadium, Springfield</div>
+        <div style="font-size:12px;color:#737983;margin-top:1px;">Sat, Aug 15, 2026 · 7:00 PM</div>
+      </div>
+    </div>
+    <div style="background:#fff;flex-shrink:0;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ECEEF1;">
+      <span style="font-size:13px;font-weight:700;color:#15171c;">234 listings</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#3b3f47;border:1px solid #DCDFE4;border-radius:8px;padding:6px 10px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M7 12h10M10 18h4" stroke="#3b3f47" stroke-width="1.8" stroke-linecap="round"/></svg>Filters</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#3b3f47;border:1px solid #DCDFE4;border-radius:8px;padding:6px 10px;">Best seats<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#3b3f47" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>
+    </div>
+    <div class="grow" style="background:#F4F5F7;padding:12px 14px;display:flex;flex-direction:column;gap:10px;overflow:hidden;">
+
+      <div style="background:#fff;border:1px solid #E9EBEE;border-radius:14px;padding:14px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:7px;">
+              <span style="font-size:14.5px;font-weight:800;color:#15171c;">Floor GA · Sec A12</span>
+              <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#1F8A4C;background:#E7F6EC;padding:3px 6px;border-radius:5px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 5 5.5.7-4 3.8 1 5.4L12 20l-4.9 2.6 1-5.4-4-3.8 5.5-.7L12 2Z" fill="#1F8A4C"/></svg>Great seat</span>
+            </div>
+            <div style="font-size:12px;color:#737983;margin-top:3px;">2 tickets together · General admission</div>
+            <div style="display:flex;align-items:center;gap:5px;margin-top:7px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#1746C8"/><path d="M7.5 12.3l3 3 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:11.5px;font-weight:600;color:#5b606a;">Verified seller · 100% guarantee</span></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:22px;font-weight:800;color:#15171c;letter-spacing:-.5px;">$1,200</div>
+            <div style="font-size:11px;color:#9aa0a8;">/ea + fees</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid #F0F1F3;">
+          <span style="font-size:11.5px;font-weight:600;color:#A0814A;">20× face value · $60 list price</span>
+          <button style="height:36px;padding:0 22px;border:none;border-radius:9px;background:#1746C8;color:#fff;font-size:13.5px;font-weight:700;">Select</button>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #E9EBEE;border-radius:14px;padding:14px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:7px;">
+              <span style="font-size:14.5px;font-weight:800;color:#15171c;">Lower Bowl · Sec 114</span>
+              <span style="font-size:10px;font-weight:700;color:#737983;background:#F0F1F3;padding:3px 6px;border-radius:5px;">Row 8</span>
+            </div>
+            <div style="font-size:12px;color:#737983;margin-top:3px;">2 tickets together · Aisle seats</div>
+            <div style="display:flex;align-items:center;gap:5px;margin-top:7px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#1746C8"/><path d="M7.5 12.3l3 3 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:11.5px;font-weight:600;color:#5b606a;">Verified seller · 4.6 ★ rating</span></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:22px;font-weight:800;color:#15171c;letter-spacing:-.5px;">$1,100</div>
+            <div style="font-size:11px;color:#9aa0a8;">/ea + fees</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid #F0F1F3;">
+          <span style="font-size:11.5px;font-weight:600;color:#A0814A;">18× face value · only 3 left</span>
+          <button style="height:36px;padding:0 22px;border:none;border-radius:9px;background:#1746C8;color:#fff;font-size:13.5px;font-weight:700;">Select</button>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #E9EBEE;border-radius:14px;padding:14px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:7px;">
+              <span style="font-size:14.5px;font-weight:800;color:#15171c;">Upper · Sec 320</span>
+              <span style="font-size:10px;font-weight:700;color:#737983;background:#F0F1F3;padding:3px 6px;border-radius:5px;">Row 22</span>
+            </div>
+            <div style="font-size:12px;color:#737983;margin-top:3px;">2 tickets together</div>
+            <div style="display:flex;align-items:center;gap:5px;margin-top:7px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#1746C8"/><path d="M7.5 12.3l3 3 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:11.5px;font-weight:600;color:#5b606a;">Verified seller · 100% guarantee</span></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:22px;font-weight:800;color:#15171c;letter-spacing:-.5px;">$840</div>
+            <div style="font-size:11px;color:#9aa0a8;">/ea + fees</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid #F0F1F3;">
+          <span style="font-size:11.5px;font-weight:600;color:#A0814A;">14× face value · lowest price</span>
+          <button style="height:36px;padding:0 22px;border:none;border-radius:9px;background:#1746C8;color:#fff;font-size:13.5px;font-weight:700;">Select</button>
+        </div>
+      </div>
+
+    </div>
+   </div>
+
+   <!-- ---------- DESKTOP / LAPTOP (B1 Resale List — Laptop) ---------- -->
+   <div class="dview" style="background:#F4F5F7;color:#15171c;font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;">
+     <!-- top nav -->
+     <div class="d-nav" style="background:#fff;border-bottom:1px solid #E6E8EC;">
+       <div style="display:flex;align-items:center;gap:30px;">
+         <div style="display:flex;align-items:center;gap:9px;">
+           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2.5" fill="#1746C8"/><path d="M9 6v12" stroke="#fff" stroke-width="1.5" stroke-dasharray="2 2"/></svg>
+           <span style="font-size:21px;font-weight:800;color:#15171c;letter-spacing:-.4px;">SeatStreet</span>
+         </div>
+         <div class="d-navlinks" style="color:#5b606a;">
+           <span>Concerts</span><span>Sports</span><span>Theater</span><span>Sell</span>
+         </div>
+       </div>
+       <div style="display:flex;align-items:center;gap:16px;">
+         <div class="d-search" style="background:#F1F2F4;width:280px;">
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#9aa0a6" stroke-width="1.8"/><path d="m16.5 16.5 3.5 3.5" stroke="#9aa0a6" stroke-width="1.8" stroke-linecap="round"/></svg>
+           <span style="font-size:13px;color:#9aa0a6;">Search events</span>
+         </div>
+         <span style="font-size:14px;font-weight:700;color:#15171c;">Sign In</span>
+         <div style="width:34px;height:34px;border-radius:50%;background:#EDEFF2;display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="#7b818c" stroke-width="1.8"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6" stroke="#7b818c" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+       </div>
+     </div>
+     <!-- event bar -->
+     <div style="flex-shrink:0;background:#fff;border-bottom:1px solid #E6E8EC;padding:16px 36px;display:flex;align-items:center;gap:16px;">
+       <div style="width:54px;height:54px;border-radius:11px;overflow:hidden;flex-shrink:0;background:#0a0910;"><img src="./hero-tour.png" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 14%;"></div>
+       <div style="flex:1;">
+         <div style="font-size:21px;font-weight:800;color:#15171c;letter-spacing:-.3px;">Tatum Snow — The Epic Odyssey Tour</div>
+         <div style="font-size:13px;color:#737983;margin-top:4px;">Aurora Stadium · Springfield · Sat, Aug 15, 2026 · 7:00 PM</div>
+       </div>
+       <div style="display:flex;align-items:center;gap:7px;border:1px solid #E2E8F2;background:#F5F8FD;border-radius:10px;padding:9px 14px;">
+         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="#1746C8" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="#1746C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+         <span style="font-size:12.5px;font-weight:700;color:#1746C8;">100% Buyer Guarantee</span>
+       </div>
+     </div>
+     <!-- filters + listings -->
+     <div class="d-wrap" style="max-width:1200px;">
+       <div style="flex:1;display:flex;gap:22px;padding:22px 36px 40px;min-height:0;">
+         <!-- filter rail -->
+         <div style="width:224px;flex-shrink:0;display:flex;flex-direction:column;gap:18px;">
+           <div style="background:#fff;border:1px solid #E6E8EC;border-radius:14px;padding:16px;">
+             <div style="font-size:14px;font-weight:800;margin-bottom:14px;">Filters</div>
+             <div style="font-size:11.5px;font-weight:700;color:#8b9099;margin-bottom:9px;letter-spacing:.3px;">PRICE PER TICKET</div>
+             <div style="height:5px;background:#E6E8EC;border-radius:4px;position:relative;margin-bottom:9px;"><div style="position:absolute;left:6%;right:8%;height:100%;background:#1746C8;border-radius:4px;"></div><div style="position:absolute;left:6%;top:50%;width:13px;height:13px;border-radius:50%;background:#fff;border:2px solid #1746C8;transform:translate(-50%,-50%);"></div><div style="position:absolute;right:8%;top:50%;width:13px;height:13px;border-radius:50%;background:#fff;border:2px solid #1746C8;transform:translate(50%,-50%);"></div></div>
+             <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:#5b606a;"><span>$840</span><span>$1,200</span></div>
+             <div style="height:1px;background:#EEF0F2;margin:16px 0;"></div>
+             <div style="font-size:11.5px;font-weight:700;color:#8b9099;margin-bottom:10px;letter-spacing:.3px;">QUANTITY</div>
+             <div style="display:flex;gap:7px;">
+               <span style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#fff;background:#1746C8;border-radius:8px;padding:7px 0;">2</span>
+               <span style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#5b606a;border:1px solid #DEE0E4;border-radius:8px;padding:7px 0;">1</span>
+               <span style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#5b606a;border:1px solid #DEE0E4;border-radius:8px;padding:7px 0;">4</span>
+             </div>
+             <div style="height:1px;background:#EEF0F2;margin:16px 0;"></div>
+             <div style="font-size:11.5px;font-weight:700;color:#8b9099;margin-bottom:10px;letter-spacing:.3px;">SECTION</div>
+             <div style="display:flex;flex-direction:column;gap:9px;font-size:13px;font-weight:600;color:#3b3f47;">
+               <span style="display:flex;align-items:center;gap:8px;"><span style="width:15px;height:15px;border-radius:4px;background:#1746C8;display:inline-flex;align-items:center;justify-content:center;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Floor / GA</span>
+               <span style="display:flex;align-items:center;gap:8px;"><span style="width:15px;height:15px;border-radius:4px;border:1.5px solid #C7CAD0;"></span>Lower Bowl</span>
+               <span style="display:flex;align-items:center;gap:8px;"><span style="width:15px;height:15px;border-radius:4px;border:1.5px solid #C7CAD0;"></span>Upper Level</span>
+             </div>
+           </div>
+         </div>
+         <!-- listings column -->
+         <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+             <span style="font-size:15px;font-weight:800;">234 listings available</span>
+             <span style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:#3b3f47;border:1px solid #DCDFE4;background:#fff;border-radius:9px;padding:8px 13px;">Sort: Best seats<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#3b3f47" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+           </div>
+           <div style="display:flex;flex-direction:column;gap:11px;">
+
+             <div style="background:#fff;border:1px solid #E9EBEE;border-radius:13px;padding:16px 18px;display:flex;align-items:center;gap:18px;">
+               <div style="flex:1;min-width:0;">
+                 <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:15.5px;font-weight:800;">Floor GA · Section A12</span><span style="display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:#1F8A4C;background:#E7F6EC;padding:3px 7px;border-radius:5px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 5 5.5.7-4 3.8 1 5.4L12 20l-4.9 2.6 1-5.4-4-3.8 5.5-.7L12 2Z" fill="#1F8A4C"/></svg>Great seat</span></div>
+                 <div style="font-size:12.5px;color:#737983;margin-top:4px;">2 tickets together · General admission</div>
+                 <div style="display:flex;align-items:center;gap:6px;margin-top:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#1746C8"/><path d="M7.5 12.3l3 3 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:12px;font-weight:600;color:#5b606a;">Verified seller · 100% guarantee</span></div>
+               </div>
+               <div style="text-align:right;flex-shrink:0;"><div style="font-size:25px;font-weight:800;letter-spacing:-.6px;">$1,200</div><div style="font-size:11.5px;color:#9aa0a8;">/ea + fees · 20× face</div></div>
+               <button class="tap" data-next="s-fvdrop" style="height:44px;padding:0 30px;border:none;border-radius:10px;background:#1746C8;color:#fff;font-size:15px;font-weight:700;cursor:pointer;">Select</button>
+             </div>
+
+             <div style="background:#fff;border:1px solid #E9EBEE;border-radius:13px;padding:16px 18px;display:flex;align-items:center;gap:18px;">
+               <div style="flex:1;min-width:0;">
+                 <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:15.5px;font-weight:800;">Lower Bowl · Sec 114</span><span style="font-size:10.5px;font-weight:700;color:#737983;background:#F0F1F3;padding:3px 7px;border-radius:5px;">Row 8</span></div>
+                 <div style="font-size:12.5px;color:#737983;margin-top:4px;">2 tickets together · Aisle seats</div>
+                 <div style="display:flex;align-items:center;gap:6px;margin-top:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#1746C8"/><path d="M7.5 12.3l3 3 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:12px;font-weight:600;color:#5b606a;">Verified seller · 4.6 ★ · only 3 left</span></div>
+               </div>
+               <div style="text-align:right;flex-shrink:0;"><div style="font-size:25px;font-weight:800;letter-spacing:-.6px;">$1,100</div><div style="font-size:11.5px;color:#9aa0a8;">/ea + fees · 18× face</div></div>
+               <button class="tap" data-next="s-fvdrop" style="height:44px;padding:0 30px;border:none;border-radius:10px;background:#1746C8;color:#fff;font-size:15px;font-weight:700;cursor:pointer;">Select</button>
+             </div>
+
+             <div style="background:#fff;border:1px solid #E9EBEE;border-radius:13px;padding:16px 18px;display:flex;align-items:center;gap:18px;">
+               <div style="flex:1;min-width:0;">
+                 <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:15.5px;font-weight:800;">Lower Bowl · Sec 121</span><span style="font-size:10.5px;font-weight:700;color:#737983;background:#F0F1F3;padding:3px 7px;border-radius:5px;">Row 19</span></div>
+                 <div style="font-size:12.5px;color:#737983;margin-top:4px;">4 tickets together</div>
+                 <div style="display:flex;align-items:center;gap:6px;margin-top:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#1746C8"/><path d="M7.5 12.3l3 3 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:12px;font-weight:600;color:#5b606a;">Verified seller · 4.8 ★ rating</span></div>
+               </div>
+               <div style="text-align:right;flex-shrink:0;"><div style="font-size:25px;font-weight:800;letter-spacing:-.6px;">$950</div><div style="font-size:11.5px;color:#9aa0a8;">/ea + fees · 16× face</div></div>
+               <button class="tap" data-next="s-fvdrop" style="height:44px;padding:0 30px;border:none;border-radius:10px;background:#1746C8;color:#fff;font-size:15px;font-weight:700;cursor:pointer;">Select</button>
+             </div>
+
+             <div style="background:#fff;border:1px solid #E9EBEE;border-radius:13px;padding:16px 18px;display:flex;align-items:center;gap:18px;">
+               <div style="flex:1;min-width:0;">
+                 <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:15.5px;font-weight:800;">Upper · Sec 320</span><span style="font-size:10.5px;font-weight:700;color:#737983;background:#F0F1F3;padding:3px 7px;border-radius:5px;">Row 22</span><span style="font-size:10.5px;font-weight:700;color:#1746C8;background:#EAF0FC;padding:3px 7px;border-radius:5px;">Lowest price</span></div>
+                 <div style="font-size:12.5px;color:#737983;margin-top:4px;">2 tickets together</div>
+                 <div style="display:flex;align-items:center;gap:6px;margin-top:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#1746C8"/><path d="M7.5 12.3l3 3 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:12px;font-weight:600;color:#5b606a;">Verified seller · 100% guarantee</span></div>
+               </div>
+               <div style="text-align:right;flex-shrink:0;"><div style="font-size:25px;font-weight:800;letter-spacing:-.6px;">$840</div><div style="font-size:11.5px;color:#9aa0a8;">/ea + fees · 14× face</div></div>
+               <button class="tap" data-next="s-fvdrop" style="height:44px;padding:0 30px;border:none;border-radius:10px;background:#1746C8;color:#fff;font-size:15px;font-weight:700;cursor:pointer;">Select</button>
+             </div>
+
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+
+  </div>
+
+  <!-- ===================== FACEVALUE: DROP PAGE ===================== -->
+  <div class="screen" id="s-fvdrop" style="background:#09090B;">
+    <div class="grow" style="position:relative;background:#09090B;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 22px) 22px calc(env(safe-area-inset-bottom) + 24px);overflow:hidden;color:#F4F4F5;">
+      <div style="position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:420px;height:300px;background:radial-gradient(50% 50% at 50% 50%,rgba(52,160,111,0.22),transparent 70%);filter:blur(8px);pointer-events:none;animation:fv-glow 6s ease-in-out infinite;"></div>
+
+      <div style="position:relative;display:flex;align-items:center;justify-content:space-between;z-index:2;">
+        <div style="display:flex;align-items:center;gap:9px;">
+          <img src="./logo.png" alt="FaceValue" style="width:26px;height:26px;object-fit:contain;">
+          <span style="font-size:16px;font-weight:600;letter-spacing:-.2px;color:#fff;">FaceValue</span>
+        </div>
+        <div style="display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border:1px solid rgba(69,180,134,0.4);background:rgba(52,160,111,0.1);border-radius:999px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:#45B486;display:block;animation:fv-dot 1.6s ease-in-out infinite;"></span>
+          <span style="font-size:10px;font-weight:700;color:#7FD3AC;letter-spacing:1.2px;">VERIFIED-FAN DROP · LIVE</span>
+        </div>
+      </div>
+
+      <div style="position:relative;margin-top:22px;height:24vh;min-height:150px;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);z-index:2;">
+        <img src="./hero-tour.png" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 14%;filter:grayscale(1) contrast(1.05) brightness(0.82);">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(9,9,11,0.1) 0%,rgba(9,9,11,0.35) 55%,rgba(9,9,11,0.92) 100%);"></div>
+        <div style="position:absolute;left:16px;right:16px;bottom:14px;">
+          <div style="font-size:24px;font-weight:700;letter-spacing:-.5px;color:#fff;line-height:1.05;">Tatum Snow</div>
+          <div style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.72);margin-top:3px;">The Epic Odyssey Tour 2026</div>
+        </div>
+      </div>
+
+      <div style="position:relative;margin-top:13px;display:flex;align-items:center;gap:8px;z-index:2;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z" stroke="#6B7280" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4" stroke="#6B7280" stroke-width="1.8"/></svg>
+        <span style="font-size:12.5px;font-weight:500;color:#8B8F98;">Sat, Aug 15, 2026 · Aurora Stadium · Springfield</span>
+      </div>
+
+      <div style="position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#45B486;">YOU PAY FACE VALUE</div>
+        <div style="font-size:60px;font-weight:700;letter-spacing:-2px;color:#fff;line-height:1;margin-top:8px;">$60.00</div>
+      </div>
+
+      <div style="position:relative;display:grid;grid-template-columns:1fr 1fr;gap:8px;z-index:2;">
+        <div style="display:flex;align-items:center;gap:8px;padding:11px 12px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);border-radius:11px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#45B486" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font-size:12px;font-weight:600;color:#D4D6DA;">One human · one ticket</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:11px 12px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);border-radius:11px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#45B486" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font-size:12px;font-weight:600;color:#D4D6DA;">Bound to you</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:11px 12px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);border-radius:11px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#45B486" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font-size:12px;font-weight:600;color:#D4D6DA;">Can't be resold</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:11px 12px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);border-radius:11px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#45B486" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font-size:12px;font-weight:600;color:#D4D6DA;">No hidden fees</span>
+        </div>
+      </div>
+
+      <button class="tap" data-next="s-fvverify" style="position:relative;z-index:2;margin-top:14px;width:100%;height:54px;border:none;border-radius:14px;background:#FAFAFA;color:#09090B;font-size:16px;font-weight:700;letter-spacing:.1px;box-shadow:0 10px 30px -10px rgba(255,255,255,0.25);">Get my ticket — $60.</button>
+      <div style="position:relative;z-index:2;margin-top:11px;display:flex;align-items:center;justify-content:center;gap:7px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="#45B486" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="#45B486" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-size:11.5px;font-weight:500;color:#6B7280;">Verified &amp; secured by FaceValue</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== FACEVALUE: VERIFY (Idle / Verifying / Verified) ===================== -->
+  <div class="screen" id="s-fvverify" style="background:#09090B;">
+
+    <!-- IDLE (checkout) -->
+    <div id="vIdle" style="flex:1;position:relative;background:#09090B;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 24px) 22px calc(env(safe-area-inset-bottom) + 22px);overflow:hidden;color:#F4F4F5;">
+      <div style="position:absolute;top:70px;left:50%;transform:translateX(-50%);width:380px;height:300px;background:radial-gradient(50% 50% at 50% 50%,rgba(52,160,111,0.10),transparent 70%);pointer-events:none;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;z-index:2;">
+        <div style="display:flex;align-items:center;gap:8px;"><img src="./logo.png" alt="FaceValue" style="width:22px;height:22px;object-fit:contain;"><span style="font-size:14px;font-weight:600;letter-spacing:-.2px;color:#fff;">FaceValue</span></div>
+        <span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:#7d818a;letter-spacing:.2px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 10V8a6 6 0 0 1 12 0v2" stroke="#7d818a" stroke-width="1.8"/><rect x="4" y="10" width="16" height="10" rx="2.5" stroke="#7d818a" stroke-width="1.8"/></svg>Secure checkout</span>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;z-index:2;width:100%;gap:16px;">
+        <div style="font-size:24px;font-weight:700;letter-spacing:-.5px;color:#fff;">Confirm your ticket</div>
+        <div style="background:#141417;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:16px 18px;">
+          <div style="display:flex;align-items:center;gap:13px;">
+            <img src="./hero-tour.png" alt="" style="width:50px;height:50px;border-radius:11px;object-fit:cover;filter:grayscale(1);flex-shrink:0;">
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:16px;font-weight:700;color:#fff;letter-spacing:-.2px;">Tatum Snow</div>
+              <div style="font-size:12.5px;color:#8B8F98;margin-top:2px;">The Epic Odyssey Tour &middot; Aurora Stadium</div>
+            </div>
+          </div>
+          <div style="height:1px;background:rgba(255,255,255,0.07);margin:15px 0;"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13.5px;margin-bottom:9px;"><span style="color:#A9ADB4;">1 &times; General Admission</span><span style="color:#E7E8EA;font-weight:600;">$60.00</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13.5px;"><span style="color:#A9ADB4;">Service fees</span><span style="color:#45B486;font-weight:700;">$0.00</span></div>
+          <div style="height:1px;background:rgba(255,255,255,0.07);margin:14px 0 13px;"></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:14px;font-weight:700;color:#fff;">Total</span><span style="font-size:24px;font-weight:800;color:#fff;letter-spacing:-.6px;">$60.00</span></div>
+          <div style="display:inline-flex;align-items:center;gap:6px;margin-top:11px;padding:5px 10px;background:rgba(69,180,134,0.1);border:1px solid rgba(69,180,134,0.25);border-radius:999px;"><span style="width:5px;height:5px;border-radius:50%;background:#45B486;"></span><span style="font-size:11px;font-weight:700;color:#7FD3AC;letter-spacing:.2px;">Face value &middot; bound to you &middot; non-transferable</span></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:0 4px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px;"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="#45B486" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 12l2 2 4-4.2" stroke="#45B486" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div style="font-size:12.5px;color:#8B8F98;line-height:1.5;">One human, one ticket. Verify to check out &mdash; we never learn who you are, only that you're one real person.</div>
+        </div>
+      </div>
+      <button class="tap" id="verifyBtn" style="z-index:2;width:100%;height:56px;border:none;border-radius:14px;background:#FAFAFA;color:#09090B;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="#09090B" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12l2 2 4-4.2" stroke="#09090B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Verify with Valiron
+      </button>
+    </div>
+
+    <!-- VERIFYING -->
+    <div id="vCheck" style="display:none;flex:1;position:relative;background:#09090B;flex-direction:column;align-items:center;padding:calc(env(safe-area-inset-top) + 28px) 26px calc(env(safe-area-inset-bottom) + 26px);overflow:hidden;color:#F4F4F5;">
+      <div style="position:absolute;top:120px;left:50%;transform:translateX(-50%);width:360px;height:360px;background:radial-gradient(50% 50% at 50% 50%,rgba(52,160,111,0.14),transparent 70%);pointer-events:none;animation:fv-glow 3s ease-in-out infinite;"></div>
+      <div style="display:flex;align-items:center;gap:8px;z-index:2;">
+        <img src="./logo.png" alt="FaceValue" style="width:22px;height:22px;object-fit:contain;">
+        <span style="font-size:14px;font-weight:600;letter-spacing:-.2px;color:#fff;">FaceValue</span>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;width:100%;">
+        <div style="position:relative;width:168px;height:168px;display:flex;align-items:center;justify-content:center;">
+          <div style="position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:#45B486;border-right-color:rgba(69,180,134,0.4);animation:spin 1.1s linear infinite;"></div>
+          <div style="position:absolute;inset:14px;border-radius:50%;border:1.5px solid transparent;border-bottom-color:rgba(69,180,134,0.5);animation:spin 1.7s linear infinite reverse;"></div>
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+            <circle cx="60" cy="60" r="47" stroke="rgba(231,232,234,0.7)" stroke-width="1.6"/>
+            <ellipse cx="60" cy="60" rx="20" ry="47" stroke="rgba(231,232,234,0.4)" stroke-width="1.3"/>
+            <ellipse cx="60" cy="60" rx="38" ry="47" stroke="rgba(231,232,234,0.2)" stroke-width="1.2"/>
+            <path d="M14 60h92" stroke="rgba(231,232,234,0.35)" stroke-width="1.3"/>
+            <path d="M19 41h82M19 79h82" stroke="rgba(231,232,234,0.16)" stroke-width="1.1"/>
+            <circle cx="60" cy="60" r="3" fill="#45B486"/>
+          </svg>
+        </div>
+        <div style="font-size:23px;font-weight:700;letter-spacing:-.4px;color:#fff;margin-top:34px;text-align:center;">Verifying with Valiron…</div>
+        <div style="font-size:13.5px;font-weight:500;color:#8B8F98;margin-top:11px;text-align:center;line-height:1.5;max-width:280px;">This takes a moment. Your identity never leaves your device.</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:20px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:#45B486;display:block;animation:fv-dot 1.2s ease-in-out infinite;"></span>
+          <span style="width:6px;height:6px;border-radius:50%;background:#45B486;display:block;animation:fv-dot 1.2s ease-in-out infinite 0.2s;"></span>
+          <span style="width:6px;height:6px;border-radius:50%;background:#45B486;display:block;animation:fv-dot 1.2s ease-in-out infinite 0.4s;"></span>
+        </div>
+      </div>
+      <button disabled style="z-index:2;width:100%;height:54px;border:1px solid rgba(255,255,255,0.12);border-radius:14px;background:rgba(255,255,255,0.04);color:#8B8F98;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <span style="width:15px;height:15px;border-radius:50%;border:2px solid rgba(139,143,152,0.4);border-top-color:#45B486;display:block;animation:spin 0.8s linear infinite;"></span>
+        Verifying…
+      </button>
+    </div>
+
+    <!-- VERIFIED -->
+    <div id="vDone" style="display:none;flex:1;position:relative;background:#09090B;flex-direction:column;align-items:center;padding:calc(env(safe-area-inset-top) + 28px) 26px calc(env(safe-area-inset-bottom) + 26px);overflow:hidden;color:#F4F4F5;">
+      <div style="position:absolute;top:110px;left:50%;transform:translateX(-50%);width:400px;height:400px;background:radial-gradient(50% 50% at 50% 50%,rgba(52,160,111,0.26),transparent 68%);pointer-events:none;animation:fv-glow 5s ease-in-out infinite;"></div>
+      <div style="display:flex;align-items:center;gap:8px;z-index:2;">
+        <img src="./logo.png" alt="FaceValue" style="width:22px;height:22px;object-fit:contain;">
+        <span style="font-size:14px;font-weight:600;letter-spacing:-.2px;color:#fff;">FaceValue</span>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;width:100%;">
+        <div style="position:relative;width:148px;height:148px;display:flex;align-items:center;justify-content:center;animation:fv-breathe 4.5s ease-in-out infinite;">
+          <svg width="132" height="132" viewBox="0 0 120 120" fill="none">
+            <circle cx="60" cy="60" r="47" stroke="#45B486" stroke-width="1.8"/>
+            <ellipse cx="60" cy="60" rx="20" ry="47" stroke="rgba(69,180,134,0.55)" stroke-width="1.3"/>
+            <ellipse cx="60" cy="60" rx="38" ry="47" stroke="rgba(69,180,134,0.3)" stroke-width="1.2"/>
+            <path d="M14 60h92" stroke="rgba(69,180,134,0.5)" stroke-width="1.3"/>
+            <path d="M19 41h82M19 79h82" stroke="rgba(69,180,134,0.24)" stroke-width="1.1"/>
+          </svg>
+          <div style="position:absolute;width:50px;height:50px;border-radius:50%;background:#2E9E6B;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px -6px rgba(46,158,107,0.7);animation:fv-pop 0.6s cubic-bezier(.2,.8,.25,1) both;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.2 4.2L19 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;margin-top:30px;">
+          <div style="font-size:26px;font-weight:700;letter-spacing:-.5px;color:#fff;">You're verified</div>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#2E9E6B"/><path d="M7.5 12.3l3 3 6-6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div style="font-size:13.5px;font-weight:600;color:#7FD3AC;margin-top:13px;text-align:center;letter-spacing:.2px;">One human · one ticket · face value</div>
+        <div style="font-size:12.5px;font-weight:500;color:#8B8F98;margin-top:8px;text-align:center;line-height:1.5;max-width:280px;">Your spot is secured. This ticket will be bound to you and can't be resold.</div>
+      </div>
+      <button class="tap" data-next="s-fvsecuring" style="z-index:2;width:100%;height:54px;border:none;border-radius:14px;background:#2E9E6B;color:#fff;font-size:16px;font-weight:700;box-shadow:0 12px 30px -10px rgba(46,158,107,0.6);">Buy at face value — $60.</button>
+    </div>
+  </div>
+
+  <!-- ===================== FACEVALUE: SECURING -> sleep -> wake + notification ===================== -->
+  <div class="screen" id="s-fvsecuring" style="background:#000;">
+    <div class="grow" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;color:#fff;text-align:center;padding:30px;">
+      <img src="./logo.png" style="width:80px;height:80px;object-fit:contain;opacity:.9;">
+      <div style="width:64px;height:64px;border-radius:50%;border:4px solid transparent;border-top-color:#fff;border-right-color:#fff;animation:spin 1s linear infinite;"></div>
+      <div><div style="font-size:22px;font-weight:600;color:#e9e9ec;">Securing your ticket…</div><div style="font-size:14px;color:#76767c;margin-top:10px;">Go ahead — you can put your phone down.<br>We'll ping you the moment you're in.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- page-refresh overlay -->
+<div id="refreshing"><div class="r"></div><div class="rt">Refreshing…</div></div>
+
+<!-- sleep / lock-screen overlay -->
+<div id="sleep"><div class="lock"><div class="lock-time">9:41</div><div class="lock-date">Saturday, August 15</div></div></div>
+
+<!-- iOS-style notification banner -->
+<div id="notif"><div class="notif-card">
+  <div class="notif-ic"><img src="./logo.png"></div>
+  <div class="notif-body">
+    <div class="notif-row"><span class="notif-app">FACEVALUE</span><span class="notif-time">now</span></div>
+    <div class="notif-title">You're in 🎟️</div>
+    <div class="notif-text">One ticket to Tatum Snow secured — at face value. Bound to you.</div>
+  </div>
+</div></div>
+
+<!-- hidden director controls -->
+<div class="ctl tap" id="ctl-notif"></div>
+<div class="ctl tap" id="ctl-reset"></div>
+
+<script>
+(function(){
+  var screens=['s-onsale','s-queue','s-soldout','s-resale','s-fvdrop','s-fvverify','s-fvsecuring'];
+  // status-bar tint follows each screen (light for the old-way pages, dark for FaceValue) in standalone/home-screen mode
+  var THEME={'s-onsale':'#ffffff','s-queue':'#F2F5FB','s-soldout':'#ffffff','s-resale':'#F4F5F7','s-fvdrop':'#09090B','s-fvverify':'#09090B','s-fvsecuring':'#000000'};
+  var themeMeta=document.querySelector('meta[name="theme-color"]');
+  function setTheme(id){ if(themeMeta&&THEME[id]) themeMeta.setAttribute('content',THEME[id]); }
+  function show(id){
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+    var el=document.getElementById(id); if(el)el.classList.add('active');
+    setTheme(id);
+    resetSecuring(); document.getElementById('refreshing').classList.remove('show');
+    if(id==='s-onsale')startCountdown();
+    if(id==='s-queue')enterQueue();
+    if(id==='s-fvverify')resetVerify();
+    if(id==='s-fvsecuring')armSecuring();
+  }
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('[data-next]');
+    if(t){ show(t.getAttribute('data-next')); }
+  });
+
+  // ---- on-sale countdown: "Tickets unlock in" card (.cd-wait) -> ready/From $60 + Buy (.cd-ready) ----
+  // Matches the Claude Design A1 On Sale component on phone AND laptop. The .cd spans hold the timer.
+  var cdTimer=null, buyReady=false;
+  function buyBtns(){ return document.querySelectorAll('.buyBtn'); }
+  function setCd(n){ var t=(n<10?'0:0'+n:'0:'+n); document.querySelectorAll('.cd').forEach(function(c){ c.textContent=t; }); }
+  function setOnSaleState(ready){
+    document.querySelectorAll('.cd-wait').forEach(function(e){ e.classList.toggle('is-hidden', ready); });
+    document.querySelectorAll('.cd-ready').forEach(function(e){ e.classList.toggle('is-hidden', !ready); });
+    buyBtns().forEach(function(btn){ btn.classList.toggle('disabled', !ready); });
+  }
+  function startCountdown(){
+    clearInterval(cdTimer); buyReady=false;
+    var n=5; setCd(n); setOnSaleState(false);
+    cdTimer=setInterval(function(){
+      n--;
+      if(n<=0){ clearInterval(cdTimer); buyReady=true; setCd(0); setOnSaleState(true); }
+      else { setCd(n); }
+    },1000);
+  }
+  buyBtns().forEach(function(btn){
+    btn.addEventListener('click',function(){
+      if(!buyReady) return;
+      buyReady=false; this.innerHTML='<span class="btnspin"></span>Processing…'; this.classList.add('disabled');
+      setTimeout(function(){ show('s-queue'); }, 1100);
+    });
+  });
+
+  // ---- queue: auto-freeze after 5s, then pull-to-refresh -> sold out ----
+  var qFreezeTimer=null, qFrozen=false, qScreen=document.getElementById('s-queue');
+  function enterQueue(){ clearTimeout(qFreezeTimer); qFrozen=false; qScreen.classList.remove('q-frozen'); qFreezeTimer=setTimeout(freeze,5000); }
+  function freeze(){ clearTimeout(qFreezeTimer); qFrozen=true; qScreen.classList.add('q-frozen'); }
+  function doRefresh(){ var ov=document.getElementById('refreshing'); ov.classList.add('show'); setTimeout(function(){ ov.classList.remove('show'); show('s-soldout'); }, 750); }
+  qScreen.addEventListener('click',function(){ if(!qFrozen){ freeze(); } else { doRefresh(); } });
+  var ty=null;
+  qScreen.addEventListener('touchstart',function(e){ ty=e.touches[0].clientY; },{passive:true});
+  qScreen.addEventListener('touchend',function(e){ if(ty!==null && (e.changedTouches[0].clientY - ty) > 45){ if(!qFrozen)freeze(); doRefresh(); } ty=null; },{passive:true});
+
+  // ---- FaceValue verify ----
+  function resetVerify(){ flip('vIdle'); }
+  function flip(which){ ['vIdle','vCheck','vDone'].forEach(function(id){ document.getElementById(id).style.display=(id===which?'flex':'none'); }); }
+  document.getElementById('verifyBtn').addEventListener('click',function(){ flip('vCheck'); setTimeout(function(){ flip('vDone'); },1600); });
+
+  // ---- securing -> screen sleeps (black) -> wakes + notification ----
+  var secState=0, secT1=null, secT2=null;
+  var sleepEl=document.getElementById('sleep'), notifEl=document.getElementById('notif');
+  function armSecuring(){
+    secState=0; clearTimeout(secT1); clearTimeout(secT2);
+    sleepEl.classList.remove('show','awake'); notifEl.classList.remove('show');
+    secT1=setTimeout(goSleep, 4000);  // screen goes black ~4s after "Securing…"
+    secT2=setTimeout(wake, 27000);    // wakes + "You're in" notification 23s after the screen sleeps
+  }
+  function goSleep(){ if(secState>0) return; secState=1; sleepEl.classList.add('show'); }
+  function wake(){ if(secState>1) return; secState=2; sleepEl.classList.add('show','awake'); notifEl.classList.add('show'); }
+  function resetSecuring(){ clearTimeout(secT1); clearTimeout(secT2); secState=0; sleepEl.classList.remove('show','awake'); notifEl.classList.remove('show'); }
+  // bottom-right tap advances the beat on cue: securing -> sleep -> wake/notification
+  document.getElementById('ctl-notif').addEventListener('click',function(){
+    if(secState===0){ clearTimeout(secT1); clearTimeout(secT2); goSleep(); }
+    else if(secState===1){ wake(); }
+  });
+  document.getElementById('ctl-reset').addEventListener('click',function(){ show('s-onsale'); });
+
+  var jump=new URLSearchParams(location.search).get('screen');
+  show(jump && screens.indexOf(jump)>=0 ? jump : 's-onsale');
+})();
+</script>
+</body>
+</html>
