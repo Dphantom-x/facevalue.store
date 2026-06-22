@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS drops (
   maxPerHuman INTEGER NOT NULL DEFAULT 1,
   mode TEXT NOT NULL DEFAULT 'full',
   status TEXT NOT NULL DEFAULT 'live',
+  accessCode TEXT,                 -- NULL/empty = open drop; set = invite-only carve-out
   createdAt INTEGER NOT NULL
 );
 CREATE TABLE IF NOT EXISTS tickets (
@@ -99,13 +100,36 @@ CREATE TABLE IF NOT EXISTS audit (
   ticketId TEXT,
   detail TEXT
 );
+CREATE TABLE IF NOT EXISTS events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ts INTEGER NOT NULL,
+  type TEXT NOT NULL,              -- drop_view | gate_block | verify_start | verify_done | claim_done
+  dropId TEXT,
+  vid TEXT,                        -- anonymous visitor id (cookie) — present even when logged out
+  userId TEXT,
+  detail TEXT
+);
 CREATE INDEX IF NOT EXISTS idx_tickets_drop ON tickets(dropId);
 CREATE INDEX IF NOT EXISTS idx_tickets_user ON tickets(userId);
 CREATE INDEX IF NOT EXISTS idx_tickets_null ON tickets(nullifierHash);
 CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(userId);
 CREATE INDEX IF NOT EXISTS idx_waitlist_drop ON waitlist(dropId);
 CREATE INDEX IF NOT EXISTS idx_audit_ts ON audit(ts);
+CREATE INDEX IF NOT EXISTS idx_events_drop ON events(dropId, type);
+CREATE INDEX IF NOT EXISTS idx_events_vid ON events(vid);
 `;
+
+/**
+ * Idempotent column migrations for DBs created before a column existed
+ * (CREATE TABLE IF NOT EXISTS never alters an existing table). Safe to run every open.
+ */
+function migrate(d: Database.Database) {
+  const cols = (table: string) =>
+    (d.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]).map((c) => c.name);
+  if (!cols("drops").includes("accessCode")) {
+    d.exec("ALTER TABLE drops ADD COLUMN accessCode TEXT");
+  }
+}
 
 function open(): Database.Database {
   mkdirSync(path.dirname(DB_PATH), { recursive: true });
@@ -113,6 +137,7 @@ function open(): Database.Database {
   d.pragma("journal_mode = WAL");
   d.pragma("foreign_keys = ON");
   d.exec(SCHEMA);
+  migrate(d);
   seedIfEmpty(d);
   return d;
 }
@@ -226,7 +251,7 @@ export function resetDb() {
   const d = db();
   const wipe = d.transaction(() => {
     d.exec(
-      "DELETE FROM tickets; DELETE FROM legacy_purchases; DELETE FROM waitlist; DELETE FROM payments; DELETE FROM audit; DELETE FROM sessions; DELETE FROM users; DELETE FROM drops;"
+      "DELETE FROM tickets; DELETE FROM legacy_purchases; DELETE FROM waitlist; DELETE FROM payments; DELETE FROM audit; DELETE FROM events; DELETE FROM sessions; DELETE FROM users; DELETE FROM drops;"
     );
     seedDrops(d);
     seedUsers(d);
@@ -241,4 +266,42 @@ export function audit(
   db()
     .prepare("INSERT INTO audit (ts, type, userId, dropId, ticketId, detail) VALUES (?, ?, ?, ?, ?, ?)")
     .run(now(), type, fields.userId ?? null, fields.dropId ?? null, fields.ticketId ?? null, fields.detail ?? null);
+}
+
+/* ---------------- funnel instrumentation ---------------- */
+
+/** Funnel stages recorded per drop. `claim_done` is server-truthed (real allocation). */
+export type FunnelEvent = "drop_view" | "gate_block" | "verify_start" | "verify_done" | "claim_done";
+
+export function trackEvent(
+  type: FunnelEvent,
+  fields: { dropId?: string | null; vid?: string | null; userId?: string | null; detail?: string }
+) {
+  db()
+    .prepare("INSERT INTO events (ts, type, dropId, vid, userId, detail) VALUES (?, ?, ?, ?, ?, ?)")
+    .run(now(), type, fields.dropId ?? null, fields.vid ?? null, fields.userId ?? null, fields.detail ?? null);
+}
+
+/**
+ * The pilot's kill-metric instrument. For a given drop:
+ *   views    = unique visitors who loaded the (unlocked) drop page
+ *   verifies = unique visitors who completed personhood verification
+ *   claims   = tickets actually allocated (server-truthed)
+ *   verifyRate = verifies / views  ← the ≥15% go/no-go gate
+ * Unique = COUNT(DISTINCT vid) so one human reloading the page isn't counted twice.
+ */
+export function funnelFor(dropId: string) {
+  const d = db();
+  const uniq = (type: FunnelEvent) =>
+    (
+      d
+        .prepare("SELECT COUNT(DISTINCT vid) c FROM events WHERE dropId = ? AND type = ? AND vid IS NOT NULL")
+        .get(dropId, type) as { c: number }
+    ).c;
+  const views = uniq("drop_view");
+  const verifyStarts = uniq("verify_start");
+  const verifies = uniq("verify_done");
+  const claims = uniq("claim_done");
+  const verifyRate = views > 0 ? verifies / views : 0;
+  return { views, verifyStarts, verifies, claims, verifyRate };
 }

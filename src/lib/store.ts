@@ -135,15 +135,17 @@ export function createDrop(input: {
   opensAt?: string | null;
   vendorId?: string | null;
   feeCents?: number;
+  accessCode?: string | null;
 }): Drop {
   const d = db();
   let id = slugify(input.event) || "drop";
   const clash = d.prepare("SELECT 1 FROM drops WHERE id = ?").get(id);
   if (clash) id = `${id}-${uid().slice(0, 4)}`;
+  const accessCode = input.accessCode?.trim() ? input.accessCode.trim() : null;
   d.prepare(
     `INSERT INTO drops (id, vendorId, artist, event, venue, date, opensAt, faceValueCents, feeCents,
-       totalInventory, remaining, maxPerHuman, mode, status, createdAt)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'live', ?)`
+       totalInventory, remaining, maxPerHuman, mode, status, accessCode, createdAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'live', ?, ?)`
   ).run(
     id,
     input.vendorId ?? null,
@@ -158,6 +160,7 @@ export function createDrop(input: {
     Number(input.totalInventory) || 0,
     Number(input.maxPerHuman) || 1,
     input.mode || "full",
+    accessCode,
     now()
   );
   return getDrop(id)!;

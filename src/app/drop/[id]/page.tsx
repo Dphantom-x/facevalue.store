@@ -6,13 +6,13 @@
  * sold-out (waitlist) · owned (QR ticket + return). The onboarding wizard
  * overlays and LOCKS the page until account + verification + payment exist.
  */
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import QRCode from "qrcode";
 import { TopNav, PageHead, Footer, FaceValueChip, Spinner } from "@/components/ui";
 import { fmtMoney } from "@/lib/format";
-import OnboardingWizard, { fetchMe, onboardingComplete, type MeState } from "@/components/OnboardingWizard";
+import OnboardingWizard, { fetchMe, onboardingComplete, track, type MeState } from "@/components/OnboardingWizard";
 
 type Drop = {
   id: string;
@@ -75,9 +75,28 @@ export default function DropDetailPage() {
   const [claiming, setClaiming] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
 
+  // Invite-only carve-out gate.
+  const [code, setCode] = useState("");
+  const [codeReady, setCodeReady] = useState(false); // URL ?code parsed
+  const [locked, setLocked] = useState(false);
+  const [teaser, setTeaser] = useState<{ event: string; venue: string; date: string } | null>(null);
+  const [codeInput, setCodeInput] = useState("");
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [nonce, setNonce] = useState(0); // forces a reload even on an unchanged (wrong) code
+  const viewedRef = useRef(false);
+
+  // Parse ?code= once on mount (window — avoids useSearchParams Suspense boundary).
+  useEffect(() => {
+    const c = new URLSearchParams(window.location.search).get("code") || "";
+    setCode(c);
+    setCodeInput(c);
+    setCodeReady(true);
+  }, []);
+
   const load = useCallback(async () => {
+    const qs = code ? `?code=${encodeURIComponent(code)}` : "";
     const [dropRes, meState] = await Promise.all([
-      fetch(`/api/drops/${id}`, { cache: "no-store" }),
+      fetch(`/api/drops/${id}${qs}`, { cache: "no-store" }),
       fetchMe(),
     ]);
     setMe(meState);
@@ -87,15 +106,40 @@ export default function DropDetailPage() {
       return;
     }
     const body = await dropRes.json();
+    if (body.locked) {
+      setLocked(true);
+      setTeaser(body.teaser);
+      setLoading(false);
+      if (code) setCodeError("That access code didn't match. Check the invite and try again.");
+      track("gate_block", id);
+      return;
+    }
+    setLocked(false);
     setDrop(body.drop);
     setMy(body.me);
     setLoading(false);
+    if (!viewedRef.current) {
+      viewedRef.current = true;
+      track("drop_view", id); // counts toward the ≥15%-verify denominator
+    }
     if (!onboardingComplete(meState)) setWizardOpen(true);
-  }, [id]);
+  }, [id, code, nonce]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    if (codeReady) void load();
+  }, [load, codeReady]);
+
+  function submitCode(e: React.FormEvent) {
+    e.preventDefault();
+    setCodeError(null);
+    setLoading(true);
+    // Reflect the code in the URL so a refresh keeps access, then reload.
+    const url = new URL(window.location.href);
+    url.searchParams.set("code", codeInput.trim());
+    window.history.replaceState({}, "", url);
+    setCode(codeInput.trim());
+    setNonce((n) => n + 1);
+  }
 
   async function claim() {
     if (!onboardingComplete(me)) {
@@ -105,7 +149,11 @@ export default function DropDetailPage() {
     setClaiming(true);
     setResult(null);
     try {
-      const res = await fetch(`/api/drop/${id}/claim`, { method: "POST" });
+      const res = await fetch(`/api/drop/${id}/claim`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
       const body = await res.json();
       if (res.ok) {
         setResult({ ok: true, message: body.message });
@@ -148,6 +196,41 @@ export default function DropDetailPage() {
       <main className="wrap" style={{ maxWidth: 760 }}>
         {loading ? (
           <div className="skel" style={{ height: 220, borderRadius: 22, marginTop: 40 }}></div>
+        ) : locked ? (
+          <div data-testid="drop-gate" style={{ maxWidth: 460, margin: "40px auto 0" }}>
+            <PageHead
+              title={teaser?.event || "Invite-only drop"}
+              subtitle={teaser ? `${teaser.venue} · ${teaser.date}` : "This drop is invite-only"}
+            />
+            <form className="card card-pad" onSubmit={submitCode} style={{ marginTop: 8 }}>
+              <div className="badge-verified" style={{ marginBottom: 12 }}>
+                <span className="seal">🔒</span> Invite-only — verified fans
+              </div>
+              <h3 style={{ fontSize: 20 }}>Enter your access code</h3>
+              <p style={{ marginTop: 6, fontSize: 14, color: "var(--muted)" }}>
+                This is a held-back carve-out for real fans. Use the code from your invite.
+              </p>
+              <div className="field" style={{ marginTop: 14 }}>
+                <label className="label">Access code</label>
+                <input
+                  data-testid="gate-code-input"
+                  className="input mono"
+                  value={codeInput}
+                  onChange={(e) => setCodeInput(e.target.value)}
+                  placeholder="e.g. HUMANS-ONLY"
+                  autoFocus
+                />
+              </div>
+              {codeError && (
+                <p data-testid="gate-error" style={{ marginTop: 10, fontSize: 13, color: "var(--red-ink)" }}>
+                  {codeError}
+                </p>
+              )}
+              <button data-testid="gate-submit" type="submit" className="btn btn-accent btn-block btn-lg" style={{ marginTop: 16 }}>
+                Unlock drop
+              </button>
+            </form>
+          </div>
         ) : notFound || !drop ? (
           <div style={{ padding: "80px 0", textAlign: "center" }}>
             <h1>Drop not found</h1>
@@ -288,6 +371,7 @@ export default function DropDetailPage() {
       {wizardOpen && (
         <OnboardingWizard
           me={me}
+          dropId={id}
           onStateChange={(next) => setMe(next)}
           onComplete={() => {
             setWizardOpen(false);

@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
     totalInventory?: number | string;
     maxPerHuman?: number | string;
     mode?: string;
+    accessCode?: string | null;
   };
   try {
     body = await req.json();
@@ -40,6 +41,7 @@ export async function POST(req: NextRequest) {
     maxPerHuman: Number(body.maxPerHuman) || 1,
     mode: (body.mode || "full") as ReleaseMode,
     vendorId: user.id,
+    accessCode: body.accessCode ?? null,
   });
   return NextResponse.json({ ok: true, drop });
 }

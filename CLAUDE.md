@@ -18,7 +18,8 @@ sanctioned, vendor-enabled pipeline. We *enforce* purchase limits (BOTS Act of 2
 fan engine terminal; remaining: record the 120s video (`docs/VIDEO_SCRIPT.md`), optional Vercel deploy.
 Track B — **PILOT SYSTEM BUILT (2026-06-12)**: full production-shaped app on SQLite — accounts/sessions,
 locked onboarding wizard, hold→capture payments (mock+Stripe manual-capture), claim/QR tickets,
-returns→waitlist reservations, door check-in, vendor Studio. **18 Playwright specs green + a
+returns→waitlist reservations, door check-in, vendor Studio, **invite-only code-gate + a conversion
+funnel that measures the ≥15%-verify pilot kill-metric**. **20 Playwright specs green + a
 screenshot walkthrough** (`walkthrough/*.png`). Read `docs/BUSINESS.md` before business/strategy work.
 
 ## Pilot system architecture (Track B — built 2026-06-12)
@@ -38,8 +39,18 @@ screenshot walkthrough** (`walkthrough/*.png`). Read `docs/BUSINESS.md` before b
 - **Domain (`lib/tickets.ts`):** claim, HMAC-signed QR tokens (`QR_SECRET`), returns→refund→waitlist
   offer, **returned inventory is RESERVED for offers** (`available = remaining − offered`), door
   check-in single-use, per-drop stats, audit log.
-- **Pages:** `/drops`, `/drop/[id]` (pre-drop countdown · live · sold-out+waitlist · owned QR · locked
-  onboarding wizard overlay), `/tickets`, `/door` (staff), `/studio` (vendor portal). Legacy `/fan`,
+- **Code-gate (invite-only carve-outs):** drops have a nullable `accessCode` (`dropCodeOk()`,
+  case-insensitive). `/api/drops/[id]?code=` returns a `{locked, teaser}` shape when the code is
+  missing/wrong; the claim path also enforces it (`NEED_CODE` → 403). Open drops (no code) are
+  unaffected — this is how Phase-1 runs a 30–50-ticket held-back carve-out at one show.
+- **Funnel instrument (the ≥15%-verify kill-metric):** `events` table + `/api/track` beacon, keyed by
+  an anonymous `fv_vid` cookie so a logged-OUT clicker still counts. Stages: `drop_view` (page load),
+  `verify_start`/`verify_done` (wizard), `claim_done` (server-truthed in the claim route).
+  `funnelFor(dropId)` = unique-visitor counts + `verifyRate = verifies/views`; Studio shows it per drop
+  with a PASS/below-15% verdict + copy-invite-link. This is the experiment that decides pilot go/no-go.
+- **Pages:** `/drops`, `/drop/[id]` (invite-gate · pre-drop countdown · live · sold-out+waitlist · owned
+  QR · locked onboarding wizard overlay), `/tickets`, `/door` (staff), `/studio` (vendor portal: create
+  drop w/ optional access code · sales + check-in + waitlist + **funnel** + audit feed). Legacy `/fan`,
   `/vendor`, `/simulation` untouched.
 
 ## Documentation system (maintain every session)
@@ -103,7 +114,7 @@ Next.js 15 (App Router, `src/`) · React 19 · TypeScript · Tailwind v4 (`@them
 ## Commands
 - `npm run prove:valiron` — Phase 0 trust-call probe (expect ALLOW on 25459, DENY on 1226/1).
 - `npm run dev` — Next dev server.
-- `npm test` — full Playwright suite (18 specs; walkthrough skipped unless WALKTHROUGH=1).
+- `npm test` — full Playwright suite (20 specs; walkthrough skipped unless WALKTHROUGH=1).
 - `$env:WALKTHROUGH="1"; npx playwright test walkthrough` — full browser click-through, saves
   screenshots to `walkthrough/` (needs a dev server running or lets Playwright start one).
 - `npm run warm` — wake Valiron before demos.

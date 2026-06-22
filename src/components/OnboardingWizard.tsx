@@ -25,6 +25,20 @@ export async function fetchMe(): Promise<MeState> {
   return (await res.json()) as MeState;
 }
 
+/** Fire-and-forget funnel beacon (never blocks the UI). */
+export function track(type: string, dropId?: string, detail?: string) {
+  try {
+    void fetch("/api/track", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ type, dropId, detail }),
+      keepalive: true,
+    });
+  } catch {
+    /* analytics must never break the flow */
+  }
+}
+
 type StepKey = "account" | "verify" | "payment" | "done";
 
 function stepFor(me: MeState | null): StepKey {
@@ -38,10 +52,12 @@ export default function OnboardingWizard({
   me,
   onStateChange,
   onComplete,
+  dropId,
 }: {
   me: MeState | null;
   onStateChange: (me: MeState) => void;
   onComplete: () => void;
+  dropId?: string;
 }) {
   const step = stepFor(me);
   const [mode, setMode] = useState<"signup" | "login">("signup");
@@ -84,6 +100,7 @@ export default function OnboardingWizard({
   async function doVerify() {
     setBusy(true);
     setError(null);
+    track("verify_start", dropId);
     try {
       const res = await fetch("/api/world-id/verify", {
         method: "POST",
@@ -95,6 +112,7 @@ export default function OnboardingWizard({
         setError(body.error || "Verification failed");
         return;
       }
+      track("verify_done", dropId);
       await refresh();
     } finally {
       setBusy(false);

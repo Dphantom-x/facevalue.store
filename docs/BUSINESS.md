@@ -149,6 +149,10 @@ surplus savings/investing · agent taste-purchases.
   trust exists.
 - **Demand proof:** the vendor willingly tells their fans to pre-verify before the drop.
 - **Funnel gate:** ≥15% verify+purchase completion, instrumented at every step.
+  **BUILT (2026-06-22):** the app now ships an invite-only access-code gate + a conversion funnel
+  (`drop_view → verify_start → verify_done → claim_done`, deduped by an anonymous visitor cookie). The
+  Studio shows `views → verified → claimed` per drop with a live **PASS ✓ / below-15%** verdict — so a
+  coded carve-out link produces the go/no-go number automatically. The instrument is no longer a TODO.
 - **Kill/pivot triggers:** no pilot after ~40 genuine attempts, or funnel <15% → pivot (behavioral
   anti-botting that needs no user opt-in, or B2C demand-side) or stop cleanly.
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
-import { getDropRow, dropPublic, waitlistState } from "@/lib/tickets";
+import { getDropRow, dropPublic, waitlistState, dropCodeOk } from "@/lib/tickets";
 import { db } from "@/lib/db";
 
 /** GET /api/drops/[id] — public drop + (if logged in) my ticket/waitlist state. */
@@ -8,6 +8,16 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   const { id } = await ctx.params;
   const row = getDropRow(id);
   if (!row) return NextResponse.json({ error: "Drop not found" }, { status: 404 });
+
+  // Invite-only carve-out: without the right code, return a minimal "locked"
+  // teaser (HTTP 200) so the page can render an access-code gate, not an error.
+  const code = req.nextUrl.searchParams.get("code");
+  if (!dropCodeOk(row, code)) {
+    return NextResponse.json({
+      locked: true,
+      teaser: { id: row.id, artist: row.artist, event: row.event, venue: row.venue, date: row.date },
+    });
+  }
 
   const user = getSessionUser(req);
   let me: {

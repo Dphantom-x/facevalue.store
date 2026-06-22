@@ -38,6 +38,7 @@ export type DropRow = {
   maxPerHuman: number;
   mode: string;
   status: string;
+  accessCode: string | null;
   createdAt: number;
 };
 
@@ -61,6 +62,7 @@ export type ClaimError =
   | "DROP_NOT_FOUND"
   | "DROP_NOT_LIVE"
   | "NOT_OPEN"
+  | "NEED_CODE"
   | "LIMIT_REACHED"
   | "SOLD_OUT"
   | "CARD_DECLINED"
@@ -105,7 +107,15 @@ export function dropPublic(d: DropRow) {
     maxPerHuman: d.maxPerHuman,
     mode: d.mode,
     status: d.status,
+    /** Invite-only carve-out? (the code itself is never exposed publicly) */
+    gated: !!d.accessCode,
   };
+}
+
+/** Constant-time-ish access-code check. Open drops (no code) always pass. */
+export function dropCodeOk(d: DropRow, code: string | null | undefined): boolean {
+  if (!d.accessCode) return true;
+  return (code ?? "").trim().toLowerCase() === d.accessCode.trim().toLowerCase();
 }
 
 export function isOpen(d: DropRow): boolean {
@@ -133,11 +143,12 @@ export function ticketIdFromQr(token: string): string | null {
 export async function claimTicket(params: {
   user: User;
   dropId: string;
+  code?: string | null;
 }): Promise<
   | { ok: true; ticket: TicketRow; payment: PaymentRecord; viaWaitlist: boolean }
   | { ok: false; error: ClaimError; message: string }
 > {
-  const { user, dropId } = params;
+  const { user, dropId, code } = params;
   const d = db();
 
   if (!user.nullifierHash)
@@ -149,6 +160,8 @@ export async function claimTicket(params: {
   if (!drop) return { ok: false, error: "DROP_NOT_FOUND", message: "Drop not found." };
   if (drop.status !== "live")
     return { ok: false, error: "DROP_NOT_LIVE", message: "This drop is not live." };
+  if (!dropCodeOk(drop, code))
+    return { ok: false, error: "NEED_CODE", message: "This drop is invite-only — an access code is required." };
   if (drop.opensAt && new Date(drop.opensAt).getTime() > now())
     return { ok: false, error: "NOT_OPEN", message: "This drop hasn't opened yet." };
 

@@ -20,8 +20,13 @@ type DropWithStats = {
   totalInventory: number;
   maxPerHuman: number;
   mode: string;
+  accessCode?: string | null;
   stats: { sold: number; checkedIn: number; revenueCents: number; feesCents: number; waitlistCount: number };
+  funnel: { views: number; verifyStarts: number; verifies: number; claims: number; verifyRate: number };
 };
+
+/** The pilot go/no-go bar: ≥15% of clickers must verify. */
+const VERIFY_GATE = 0.15;
 
 type AuditRow = { id: number; ts: number; type: string; detail: string | null };
 
@@ -35,6 +40,7 @@ const DEFAULTS = {
   totalInventory: "120",
   maxPerHuman: "1",
   mode: "full",
+  accessCode: "",
 };
 
 export default function StudioPage() {
@@ -48,6 +54,14 @@ export default function StudioPage() {
   const [form, setForm] = useState<Record<string, string>>(DEFAULTS);
   const [creating, setCreating] = useState(false);
   const [created, setCreated] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  function copyInvite(d: DropWithStats) {
+    const link = `${window.location.origin}/drop/${d.id}${d.accessCode ? `?code=${encodeURIComponent(d.accessCode)}` : ""}`;
+    void navigator.clipboard?.writeText(link);
+    setCopiedId(d.id);
+    setTimeout(() => setCopiedId((c) => (c === d.id ? null : c)), 1500);
+  }
 
   const isVendor = me?.user && (me.user.role === "vendor" || me.user.role === "admin");
 
@@ -173,6 +187,10 @@ export default function StudioPage() {
                   <label className="label">Max per human</label>
                   <input data-testid="studio-max" className={`${field} mono`} type="number" min="1" value={form.maxPerHuman} onChange={(e) => set("maxPerHuman", e.target.value)} />
                 </div>
+                <div className="field col-2">
+                  <label className="label">Access code <span style={{ color: "var(--faint)", fontWeight: 400 }}>(optional — invite-only carve-out; blank = open drop)</span></label>
+                  <input data-testid="studio-accesscode" className={`${field} mono`} value={form.accessCode} onChange={(e) => set("accessCode", e.target.value)} placeholder="e.g. HUMANS-ONLY" />
+                </div>
               </div>
               <div className="launch-row">
                 <button data-testid="studio-create" className="btn btn-accent btn-lg" disabled={creating}>
@@ -190,28 +208,87 @@ export default function StudioPage() {
             <section>
               <h2 style={{ fontSize: 24 }}>Your drops</h2>
               <div data-testid="studio-drops" style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
-                {drops.map((d) => (
-                  <div key={d.id} className="droprow" data-testid="studio-drop-row">
-                    <div className="ev-cell">
-                      <div className="ev">{d.event}</div>
-                      <div className="sub">{d.venue} · {d.date}</div>
-                    </div>
-                    <div>
-                      <div className="cell-k">Sold</div>
-                      <div className="cell-v">{d.stats.sold} / {d.totalInventory}</div>
-                    </div>
-                    <div>
-                      <div className="cell-k">Checked in</div>
-                      <div className="cell-v">{d.stats.checkedIn}</div>
-                    </div>
-                    <div>
-                      <div className="cell-k">Revenue · waitlist</div>
-                      <div className="cell-v fan">
-                        {fmtMoney(d.stats.revenueCents / 100)} · {d.stats.waitlistCount} waiting
+                {drops.map((d) => {
+                  const pass = d.funnel.verifyRate >= VERIFY_GATE;
+                  const ratePct = (d.funnel.verifyRate * 100).toFixed(0);
+                  return (
+                    <div key={d.id} data-testid="studio-drop-row" className="card" style={{ padding: 0, overflow: "hidden" }}>
+                      <div className="droprow" style={{ border: "none", borderRadius: 0 }}>
+                        <div className="ev-cell">
+                          <div className="ev">
+                            {d.event}
+                            {d.accessCode ? (
+                              <span className="chip chip-neutral" style={{ marginLeft: 8, fontSize: 11 }}>🔒 invite-only</span>
+                            ) : null}
+                          </div>
+                          <div className="sub">{d.venue} · {d.date}</div>
+                        </div>
+                        <div>
+                          <div className="cell-k">Sold</div>
+                          <div className="cell-v">{d.stats.sold} / {d.totalInventory}</div>
+                        </div>
+                        <div>
+                          <div className="cell-k">Checked in</div>
+                          <div className="cell-v">{d.stats.checkedIn}</div>
+                        </div>
+                        <div>
+                          <div className="cell-k">Revenue · waitlist</div>
+                          <div className="cell-v fan">
+                            {fmtMoney(d.stats.revenueCents / 100)} · {d.stats.waitlistCount} waiting
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Conversion funnel — the pilot's go/no-go instrument */}
+                      <div
+                        data-testid="studio-funnel"
+                        style={{
+                          borderTop: "1px solid var(--line)",
+                          background: "var(--surface-2)",
+                          padding: "14px 18px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 18,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <div style={{ display: "flex", gap: 18, fontSize: 13 }}>
+                          <span><b data-testid="funnel-views">{d.funnel.views}</b> <span style={{ color: "var(--muted)" }}>views</span></span>
+                          <span style={{ color: "var(--faint)" }}>→</span>
+                          <span><b data-testid="funnel-verifies">{d.funnel.verifies}</b> <span style={{ color: "var(--muted)" }}>verified</span></span>
+                          <span style={{ color: "var(--faint)" }}>→</span>
+                          <span><b data-testid="funnel-claims">{d.funnel.claims}</b> <span style={{ color: "var(--muted)" }}>claimed</span></span>
+                        </div>
+                        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
+                          <span
+                            data-testid="funnel-rate"
+                            className="mono"
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 700,
+                              padding: "4px 10px",
+                              borderRadius: 999,
+                              background: pass ? "var(--fan-wash)" : "var(--red-wash, #fdecec)",
+                              color: pass ? "var(--fan-ink)" : "var(--red-ink)",
+                            }}
+                            title="Verify rate = verified ÷ views. Pilot go/no-go bar is 15%."
+                          >
+                            {ratePct}% verify {d.funnel.views > 0 ? (pass ? "· PASS ✓" : "· below 15%") : "· no data yet"}
+                          </span>
+                          <button
+                            type="button"
+                            data-testid="studio-copy-invite"
+                            className="btn btn-ghost"
+                            style={{ fontSize: 12, padding: "5px 10px" }}
+                            onClick={() => copyInvite(d)}
+                          >
+                            {copiedId === d.id ? "✓ Copied" : d.accessCode ? "Copy invite link" : "Copy link"}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
 
