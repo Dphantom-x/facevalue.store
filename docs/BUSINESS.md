@@ -121,7 +121,9 @@ surplus savings/investing · agent taste-purchases.
 - **TicketSwap / Tixel / Twickets** — fair (capped) resale works as a business: TicketSwap 18M+ users
   on <$10M raised (capital-efficient), Tixel expanded to the US.
 - **Lyte (†2024)** — cautionary: $53M raised, collapsed owing promoters; held money + bad acquisition.
-  Reinforces: never custody funds, never inherit complexity.
+  Reinforces: never custody funds, never inherit complexity. **(Funding corrected 2026-06-22:
+  DICE raised ~$187–200M total — NOT $238M; 2022 revenue $28.5M on a $51.1M loss; "2025
+  profitability / $1B tickets" is unverified and likely Fever's number, not DICE's.)**
 - **Also:** EQL (raffles), token-gating; indirect: pre-order windows, dynamic pricing, doing nothing.
 - **The real enemy:** the instant-sellout ego metric — vendors are addicted to "sold out in 1.2s."
 
@@ -180,7 +182,54 @@ surplus savings/investing · agent taste-purchases.
 - Real World ID staging widget vs simulated (needed before any real pilot — required for the funnel test).
 - Pilot payment rails: Stripe account + payout mechanics for the fee-waived pilot.
 
+## Verified facts & execution plan (fact-check 2026-06-22)
+
+**Five parallel research agents stress-tested a strategy memo. Key verified findings:**
+
+- **World ID is LEGALLY CLEAN in NYC — the biggest unknown is now a green light.** The WLD *token*
+  ban in NY does NOT block the World ID *verification* SDK (IDKit) — it's available to US devs.
+  **Device-level verification is non-biometric** (trusted-device passkey, no iris/face) → falls
+  ENTIRELY outside NYC's biometric law (Admin Code §22-1201) — no signage, no liability. Orbs aren't
+  in NYC anyway. ⇒ **Use device-level; the MSG "biometric backlash" is a MARKETING problem, not legal.**
+- **MSG breach is REAL** (ShinyHunters ~June 2026, 45GB incl. facial-recognition records + customer
+  emails; *Avalo v. MSG*, $5M class action, SDNY). The "26M records" is the hackers' unverified claim.
+  Use as a privacy-positioning foil — "anonymous to everyone, accountable at the door."
+- **DICE is NOT a Brooklyn monopoly.** Came to US Sept 2017 (SF+LA; NY in 2019); real indie exclusives
+  but clustered in 2021; now Fever-owned (June 2025). Many rooms still on Eventbrite/RA/Ticketmaster —
+  **that gap is our lane.** Our edge vs DICE = personhood (one *human*, not one *device* → beats
+  SIM-farm/burner loophole). Lead with POP *on top of* existing ticketers, never "be a better DICE."
+- **EQL model validates our engine:** $0 auth hold → charge only winners (= our manual-capture);
+  fee 5.5% to the brand, passed to winners ("Run Fair Fee" from $2.99). A real revenue template.
+- **Stripe Connect zero-custody build note:** use **direct charges + `application_fee_amount`** (NOT
+  destination charges — those route principal through us first). Each venue = KYC'd connected account
+  (Standard = lowest liability). Stay on primary/face-value sales (scalp *resale* is the policy-risk zone).
+- **Pricing correction:** a $1 fee barely covers Stripe (2.9%+$0.30). For real margin use ~$2.99 or ~5%.
+
+**Corrected Brooklyn target list (verify links before outreach):**
+- 🚨 **Baby's All Right** — on DICE; ~280 cap; booker **Alex Gleeson**. **Billy Jones DIED June 2025 — do NOT contact.**
+- **Market Hotel** (RA, ~400) — booker **Todd P (Todd Patrick)**. Strong sellout/scalping pressure.
+- **Trans-Pecos** (RA + **TicketWeb**, not Eventbrite) — outreach **booking@thetranspecos.com**.
+- **Elsewhere** (**Eventbrite**-primary, DICE secondary) — RFID = drinks, not entry.
+- **The Sultan Room** (DICE + Eventbrite). **TV Eye** (ticketer UNCONFIRMED) — bookers Todd Abramson / Caleb Braaten.
+- **Paragon** (RA) — nearly closed 2025; verify it's open.
+- **Best scalping proof point:** Geese (Brooklyn band) — 2026 tour resale ~$2,000, partnered with CashOrTrade.
+
+**The sequenced pilot plan (≤$5k; the party is move #2, not #1):**
+1. **Phase 0 (now, ~$0):** deploy the pilot app (phone-clickable) + wire real World ID device-level +
+   stand up @NYCScalpWatch.
+2. **Phase 1 (wk 1–2, ~$0): code-gate pilot.** 30–50-ticket carve-out at ONE oversubscribed RA/Eventbrite
+   show; gate the venue's codes behind World ID. **Gate: ≥15% of clickers verify.**
+3. **Phase 2 (wk 3–6, ≤$5k): the party.** Co-sponsor a licensed-bar carve-out first ($50–100), or our
+   own "Humans Only" night if Phase 1 validated. Full system + Stripe Connect + door scanner. A legit
+   150-cap Brooklyn weeknight is **$3.4–5k all-in** — treat ≤$3k net loss as tuition; aim to break even on bar.
+4. **Kill/pivot:** <15% verify, or no free carve-out after ~40 honest asks → friction is fatal, pivot.
+
 ## Changelog
+- **2026-06-22** — Fact-checked a strategy memo with 5 research agents. Corrected DICE numbers
+  (~$187–200M not $238M; 2022 rev $28.5M; "2025 profitability" unverified). Confirmed World ID
+  device-level is legal + non-biometric in NYC (biggest de-risk). MSG breach/Avalo suit real.
+  Stripe Connect = direct charges for zero-custody. Fixed venue list (Billy Jones deceased; Trans-Pecos
+  on TicketWeb; Elsewhere on Eventbrite). Locked the sequenced code-gate-first pilot plan.
 - **2026-06-12 (later)** — Concert Kit deep intel: 8 weeks old, 1 client (30STM 2027), code-gating only
   (ticket stays transferable — our door-binding is the differentiator), Bruno Mars/Live Nation denial
   scandal, not a P&L product. Added "NYC inner circle" GTM positioning (status framing, locals-first,
