@@ -57,6 +57,9 @@ screenshot walkthrough** (`walkthrough/*.png`). Read `docs/BUSINESS.md` before b
 - `docs/journal/YYYY-MM-DD-slug.md` — one entry per working session: work done, `**Decision:**` lines
   (with why), `**Bug:**`/`**Fix:**` pairs. Add an index row in `docs/JOURNAL.md` (template + conventions live there).
 - `docs/BUSINESS.md` — living business truth (idea, model, risks, gates, funding stance) + changelog.
+- `docs/FUNDING.md` — fundraising playbook: grants, competitions, student VC (Dorm Room Fund), angels —
+  with application details + sources. Self-contained so a fresh chat can help start applying.
+- `docs/DEPLOY.md` — turnkey Railway deploy guide (SQLite + persistent volume).
 - `CLAUDE.md` (this file) — living technical truth.
 - Rule: journal = what happened and why; living docs = what's true now. When current truth changes,
   update the living doc AND journal it.
