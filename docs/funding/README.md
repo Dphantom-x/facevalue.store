@@ -14,6 +14,8 @@
 | [profile-map-2026-07-03.md](profile-map-2026-07-03.md) | Full profile-verified funding map (Latino/immigrant/City Tech/Brooklyn) — live-checked 2026-07-03 |
 | [hackathon-calendar.md](hackathon-calendar.md) | H2-2026 hackathons/competitions with cash prizes, ranked by EV — verified 2026-07-03 |
 | [application-guides.md](application-guides.md) | Per-program form questions + the "prep once, use everywhere" asset list — verified 2026-07-03 |
+| [expanded-2026-07-03.md](expanded-2026-07-03.md) | ~45 more programs found 2026-07-03 — **incl. YC F2026 (deadline Jul 27!)**, SPC Fellowship, Comcast SportsTech, NY Ventures 1:1 match, founder-clubs read |
+| [../outreach/nyc-targets-2026-07-03.md](../outreach/nyc-targets-2026-07-03.md) | NYC carve-out venues + promoters + press + Concert Kit contact + "first 10 to contact" |
 
 ## The strategy in six lines
 
@@ -28,6 +30,10 @@
 
 | Program | $ | Type | Status | Next action | Deadline |
 |---|---|---|---|---|---|
+| **🚨 Y Combinator F2026** | $500K | VC (equity) | ☐ not started | Free app, ~a weekend; the demo fits | **Jul 27 2026** |
+| **SPC Founder Fellowship** | $400K + guaranteed $600K | VC (equity) | ☐ not started | Watch for fall apps (NYC bootcamp option) | ~this summer |
+| **Comcast SportsTech** | Program + equity | Accelerator | ☐ not started | Doubles as vendor/venue distribution | ~mid-Aug |
+| **NY Ventures 1:1 match** | $50–250K matching | Match | ☐ needs entity | Pre-file so any angel check → 2× | Rolling |
 | Emergent Ventures | ~$1K–50K ⚠️est | Grant (equity-free) | ☐ not started | Write ≤1,500-word proposal → form | Rolling (~1wk response) |
 | Unshackled Ventures | ~$300–500K | VC (equity) | ☐ not started | 5-min typeform | Rolling |
 | One Way Ventures | ~$500K–1M | VC (equity) | ☐ not started | Pitch form (same materials) | Rolling |
