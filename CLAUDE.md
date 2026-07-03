@@ -59,6 +59,8 @@ screenshot walkthrough** (`walkthrough/*.png`). Read `docs/BUSINESS.md` before b
 - `docs/BUSINESS.md` — living business truth (idea, model, risks, gates, funding stance) + changelog.
 - `docs/FUNDING.md` — fundraising playbook: grants, competitions, student VC (Dorm Room Fund), angels —
   with application details + sources. Self-contained so a fresh chat can help start applying.
+- `docs/funding/` — the application war room (2026-07-03): status board (`README.md`), profile-verified
+  map (Latino/immigrant/City Tech/Brooklyn), hackathon calendar + per-program application guides.
 - `docs/DEPLOY.md` — turnkey Railway deploy guide (SQLite + persistent volume).
 - `CLAUDE.md` (this file) — living technical truth.
 - Rule: journal = what happened and why; living docs = what's true now. When current truth changes,

@@ -8,6 +8,16 @@
 > point-in-time snapshot.** Programs, amounts, and deadlines change — **verify on the live page before
 > relying on any number or date.** Flagged uncertainties are marked ⚠️. Probability estimates are
 > informed judgment, not data.
+>
+> 🔄 **2026-07-03 update — start at [`docs/funding/README.md`](funding/README.md)** (the application
+> war room: status board, profile-verified map, calendar). Key deltas since this playbook was written:
+> Latino-branded corporate grants (Google/AWS/Comcast) verified **dead**; best-matched first-check tier
+> = **immigrant-founder VC (Unshackled Ventures, One Way Ventures)** — pre-traction is their thesis;
+> added CUNY I-Corps (~$1.5K + NSF credential), NYC SBS FastTrac, BPL PowerUP ($20K, Brooklyn,
+> pre-entity OK); City Tech is NOT a Blackstone LaunchPad host (CUNY-wide programs still open);
+> NYCEDC next window ~Oct–Dec 2026 (VHNYC track = $10K non-dilutive); **no entity = no SAFE — incorporate
+> before any equity check**; and the odds percentages below should be read as judgment — the real
+> target is one angel's pre-stated "show me X and I'll write $Y."
 
 ---
 
@@ -63,7 +73,7 @@ Start with **Emergent Ventures + the next identity hackathon.** Best risk-adjust
 ### The student unlock — dilutive, but your most accessible *serious* check
 | Program | What / amount | Why it fits | How to apply |
 |---|---|---|---|
-| **Dorm Room Fund** ⭐ | **$90K–$250K**, uncapped SAFE (~1.3%). **EQUITY.** | **Student-only VC — you qualify directly as a CUNY student** (most founders can't). Dedicated **NYC** team; fast after the investment committee. The single strongest "real money" door for your profile. | https://www.dormroomfund.com/apply → screening call → regional IC pitch · **rolling** |
+| **Dorm Room Fund** ⭐ | **$90K–$250K**, ~1.3% target (instrument unconfirmed). **EQUITY.** | **Student-only VC — you qualify directly as a CUNY student** (most founders can't). Dedicated **NYC** team. ⚠️ **Velocity flag (verified 2026-07-03): ~3 deals in 2025, 1 in 2026 YTD** — eligible ≠ likely; apply, but treat as a lottery ticket, not a plan. | https://www.dormroomfund.com/apply → screening call → regional IC pitch · **rolling** |
 
 ---
 
