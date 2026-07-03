@@ -12,7 +12,7 @@
 | File | What it is |
 |---|---|
 | [profile-map-2026-07-03.md](profile-map-2026-07-03.md) | Full profile-verified funding map (Latino/immigrant/City Tech/Brooklyn) — live-checked 2026-07-03 |
-| hackathon-calendar.md | *(incoming — research running)* Concrete H2-2026 hackathons/competitions with cash prizes, ranked |
+| [hackathon-calendar.md](hackathon-calendar.md) | H2-2026 hackathons/competitions with cash prizes, ranked by EV — verified 2026-07-03 |
 | application-guides.md | *(incoming — research running)* Per-program application questions + what to prepare |
 
 ## The strategy in six lines
@@ -39,7 +39,12 @@
 | Z Fellows | $10K optional | Program (+tiny SAFE) | ☐ not started | Short app | Rolling |
 | World Chain dev grant | ⚠️unpublished | Grant | ☐ not started | Airtable form (confirm US OK) | Rolling |
 | Dorm Room Fund | $90–250K | VC (equity) | ☐ not started | ⚠️ ~1 deal in 2026 YTD — lottery ticket | Rolling |
-| Identity/web3 hackathons | $2.5–15K/track | Prizes (equity-free) | ☐ not started | See hackathon-calendar.md | Per event |
+| **Gemini XPRIZE** | **$2M pool, 25×≥$50K** | Prize (equity-free) | ☐ not started | Register → build (AI runs real ops on the pilot) | **Aug 17** |
+| ETHGlobal Lisbon | $125K+ | Prize (equity-free) | ☐ not started | Apply (World sponsor); decide travel | **Apply Jul 10** |
+| ETHOnline (online) | TBA (~$225K '24) | Prize (equity-free) | ☐ not started | Apply; anchor Sept event | Sep 4–16 |
+| World Build Labs | ~$20K + up to $200K | Prize/grant | ☐ not started | Rolling form; ask US-eligibility | Cohort 4 ⚠️unannounced |
+| Slack Agent Builder | $42K | Prize (equity-free) | ☐ not started | Optional 5-day side-sprint | **Jul 13** |
+| Other identity/web3 hackathons | $2.5–15K/track | Prizes (equity-free) | ☐ not started | See [hackathon-calendar.md](hackathon-calendar.md) | Per event |
 
 ## Calendar stack (set reminders NOW — all currently closed)
 
