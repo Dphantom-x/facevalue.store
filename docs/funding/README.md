@@ -13,7 +13,7 @@
 |---|---|
 | [profile-map-2026-07-03.md](profile-map-2026-07-03.md) | Full profile-verified funding map (Latino/immigrant/City Tech/Brooklyn) — live-checked 2026-07-03 |
 | [hackathon-calendar.md](hackathon-calendar.md) | H2-2026 hackathons/competitions with cash prizes, ranked by EV — verified 2026-07-03 |
-| application-guides.md | *(incoming — research running)* Per-program application questions + what to prepare |
+| [application-guides.md](application-guides.md) | Per-program form questions + the "prep once, use everywhere" asset list — verified 2026-07-03 |
 
 ## The strategy in six lines
 
